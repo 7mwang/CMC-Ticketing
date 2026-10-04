@@ -90,6 +90,15 @@ The following Software Requirements Specification has been accepted and approved
     - [3.5.5 Maintainability](#355-maintainability)
     - [3.5.6 Portability](#356-portability)
     - [3.5.7 Usability and Accessibility](#357-usability-and-accessibility)
+    - [4. Software Design Specification]
+    - [4.1 System Description]
+    - [4.2 Software Architecture Overview]
+    - [4.3 UML Class Diagram]
+    - [4.4 Class Descriptions]
+    - 4.4.1 -> 4.4.x
+    - [4.5 Development Plan and Timeline]
+    - [4.5.1 Partitioning of Tasks]
+    - [4.5.2 Team Member Responsibilities]
 
 # 1. Introduction
 
@@ -851,3 +860,25 @@ The following quality requirements apply to the whole system and are stated in m
 | **NFR-U-01** | In usability testing, at least 90% of first-time participants shall complete a standard purchase without help. |
 | **NFR-U-02** | The median time to complete a standard purchase in usability testing shall not exceed 3 minutes.               |
 | **NFR-U-03** | Customer-facing pages shall meet WCAG 2.1 Level AA.                                                            |
+# **4\. Software Design Specification**
+
+This section describes how the CMC Ticketing System would be built. It is written for the developers who would implement and maintain the system, and it covers a short description of the system (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5).
+
+## **4.1 System Description**
+
+The CMC Ticketing System is a web-based ticketing system shared by all 20 Chinese Multi-Cinema theaters in San Diego. Customers use the website or a lobby kiosk to browse showtimes, buy up to 20 tickets, choose seats in deluxe auditoriums, and receive tickets by email or print, either as guests or with an optional account. Employees use the same system to sell, scan and refund tickets; administrators manage movies, showtimes and prices; and managers view sales reports.
+
+The design is object-oriented and uses a three-tier client-server architecture. All three sales channels are web browser clients that talk to one central server and one central database, so every theater, kiosk and box office sees the same showtimes, prices and seat availability (SI-03). The classes in Section 4.4 build on the conceptual classes in Section 3.4.
+
+## **4.2 Software Architecture Overview**
+
+## **4.3 UML Class Diagram**
+
+## **4.4 Class Descriptions**
+4.4.1 -> 4.4.x
+
+## **4.5 Development Plan and Timeline**
+
+### **4.5.1 Partitioning of Tasks**
+
+### **4.5.2 Team Member Responsibilities**
