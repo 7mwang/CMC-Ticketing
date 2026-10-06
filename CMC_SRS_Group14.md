@@ -872,6 +872,45 @@ The design is object-oriented and uses a three-tier client-server architecture. 
 
 ## **4.2 Software Architecture Overview**
 
+Figure 2 shows the major components of the system (solid boxes), grouped into tiers (dashed boxes), and the connectors between them (arrows K1 to K5).
+
+![Figure 2. Software architecture diagram of the CMC Ticketing System](images/figure2-architecture.png)
+
+*Figure 2. Software architecture diagram of the CMC Ticketing System*
+
+**Components.** Table 4-1 describes each component in Figure 2\.
+
+**Table 4-1.** *Components*
+
+| Component | Tier | Description |
+| :---- | :---- | :---- |
+| **Customer Website** | Client | Browser application for customers on phones and computers: browse showtimes, buy tickets, and manage an optional account. |
+| **Lobby Kiosk** | Client | Touchscreen version of the purchase flow in each theater lobby; prints tickets. |
+| **Employee Workstation** | Client | Browser application for staff. It shows box-office, scanning, administration or report screens depending on the employee's role. |
+| **Browsing** | Server module | Returns movies, showtimes, prices, seats remaining and review scores (FR-01 to FR-06). |
+| **Ticket Purchase** | Server module | Holds tickets for five minutes, takes payment and issues tickets (FR-07 to FR-21). |
+| **Accounts** | Server module | Sign-in, customer accounts, loyalty points and membership (FR-22 to FR-28). |
+| **Box Office** | Server module | Walk-up sales, ticket scanning and refunds (FR-29 to FR-33). |
+| **Administration** | Server module | Movies, showtimes, auditoriums, prices and transaction overrides (FR-34 to FR-40). |
+| **Reports** | Server module | Sales and revenue reports for CMC management (FR-41 to FR-43). |
+| **Data Access Layer** | Server | Loads and saves the objects of Figure 3 to and from the database for every module. |
+| **Central Database** | Data | Stores theaters, showtimes, seat status, tickets, transactions and accounts. |
+| **Payment, Email and Review Services** | External | Outside services that approve payments and refunds, send emails, and supply review scores. |
+
+**Connectors.** Table 4-2 describes how the components communicate.
+
+**Table 4-2.** *Connectors*
+
+| ID | Connects | Protocol | Purpose |
+| :---- | :---- | :---- | :---- |
+| **K1** | Clients and server | HTTPS | Carries every request and response, encrypted with TLS (CI-01). |
+| **K2** | Data Access Layer and database | SQL | Reads and saves data. Seat changes are saved one at a time so a seat cannot be sold twice (FR-12). |
+| **K3** | Server and Payment Service | HTTPS API | Approves payments and refunds. CMC stores only the returned payment token (SI-01). |
+| **K4** | Server and Email Service | HTTPS API | Sends confirmations and digital tickets (SI-04). |
+| **K5** | Server and Review Service | HTTPS API | Gets review scores. If the service does not answer, showtimes are shown without scores (SI-02). |
+
+**Example.** When a customer buys tickets on the website, the request travels over K1 to the Ticket Purchase module. The module holds the selected seats through the Data Access Layer (K2), sends the payment to the Payment Service (K3), saves the transaction and tickets (K2), and has the Email Service send the tickets to the customer (K4). Because every channel uses the same database, those seats immediately show as sold on the kiosks and at the box office.
+
 ## **4.3 UML Class Diagram**
 
 ## **4.4 Class Descriptions**
