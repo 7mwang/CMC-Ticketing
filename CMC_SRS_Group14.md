@@ -886,17 +886,17 @@ The following quality requirements apply to the whole system and are stated in m
 | **NFR-U-02** | The median time to complete a standard purchase in usability testing shall not exceed 3 minutes.               |
 | **NFR-U-03** | Customer-facing pages shall meet WCAG 2.1 Level AA.                                                            |
 
-# 4. Software Design Specification**
+# 4. Software Design Specification
 
 This section describes how the CMC Ticketing System would be built. It is written for the developers who would implement and maintain the system, and it covers a short description of the system (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5).
 
-## 4.1 System Description**
+## 4.1 System Description
 
 The CMC Ticketing System is a web-based ticketing system shared by all 20 Chinese Multi-Cinema theaters in San Diego. Customers use the website or a lobby kiosk to browse showtimes, buy up to 20 tickets, choose seats in deluxe auditoriums, and receive tickets by email or print, either as guests or with an optional account. Employees use the same system to sell, scan and refund tickets; administrators manage movies, showtimes and prices; and managers view sales reports.
 
 The design is object-oriented and uses a three-tier client-server architecture. All three sales channels are web browser clients that talk to one central server and one central database, so every theater, kiosk and box office sees the same showtimes, prices and seat availability (SI-03). The classes in Section 4.4 build on the conceptual classes in Section 3.4.
 
-## 4.2 Software Architecture Overview**
+## 4.2 Software Architecture Overview
 
 Figure 2 shows the major components of the system (solid boxes), grouped into tiers (dashed boxes), and the connectors between them (arrows K1 to K5).
 
@@ -937,7 +937,7 @@ Figure 2 shows the major components of the system (solid boxes), grouped into ti
 
 **Example.** When a customer buys tickets on the website, the request travels over K1 to the Ticket Purchase module. The module holds the selected seats through the Data Access Layer (K2), sends the payment to the Payment Service (K3), saves the transaction and tickets (K2), and has the Email Service send the tickets to the customer (K4). Because every channel uses the same database, those seats immediately show as sold on the kiosks and at the box office.
 
-## 4.3 UML Class Diagram**
+## 4.3 UML Class Diagram
 Figure 3 shows the system's classes and their attributes, operations and relationships. The design keeps the ten classes from Section 3.4 and adds two more, being an abstract Account class that holds the sign-in data customers and employees share, and a PaymentGateway interface for the external payment service.
 
 **Notation.** A minus sign (-) marks a private attribute and a plus sign (+) a public operation. An italic class name is abstract. A hollow triangle shows inheritance, a filled diamond shows composition (the part belongs to the whole), a solid arrow shows an association with its multiplicity at each end, and a dashed arrow shows that one class uses another.
@@ -946,7 +946,7 @@ Figure 3 shows the system's classes and their attributes, operations and relatio
 
 *Figure 3. UML class diagram of the CMC Ticketing System*
 
-## 4.4 Class Descriptions**
+## 4.4 Class Descriptions
 
 Each class is described below. Data types match those detailed in Section 3.4: Integer, String, Decimal (money), DateTime, Boolean, and List or Map for collections. Some attributes use enumerated types (Enums), either directly or as part of a collection. Each Enum is restricted to a predefined set of options listed in the corresponding descriptions. Operations show their parameters in parentheses and their return type in the second column.
 
@@ -1111,7 +1111,7 @@ A permanent record of a refund, override, or price or schedule change (FR-39).
 |  |  |  |
 |  |  |  |
 
-## 4.5 Development Plan and Timeline**
+## 4.5 Development Plan and Timeline
 
 ### **4.5.1 Partitioning of Tasks**
 | **#** | **Task** | **Description** | **Lead** | **Support** | **Target date**
@@ -1126,7 +1126,7 @@ A permanent record of a refund, override, or price or schedule change (FR-39).
 | 8 | something | blank | blank | blank | a set time |
 
 
-### 4.5.2 Team Member Responsibilities**
+### 4.5.2 Team Member Responsibilities
 | **Member** | **Role** | **Tasks led** | **Responsibilities** |
 |     ---    |    ---   |      ---      |          ---         |
 | Luke F.| Role | Tasks | Responsibilities |
