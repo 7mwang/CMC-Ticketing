@@ -912,6 +912,13 @@ Figure 2 shows the major components of the system (solid boxes), grouped into ti
 **Example.** When a customer buys tickets on the website, the request travels over K1 to the Ticket Purchase module. The module holds the selected seats through the Data Access Layer (K2), sends the payment to the Payment Service (K3), saves the transaction and tickets (K2), and has the Email Service send the tickets to the customer (K4). Because every channel uses the same database, those seats immediately show as sold on the kiosks and at the box office.
 
 ## **4.3 UML Class Diagram**
+Figure 3 shows the system's classes and their attributes, operations and relationships. The design keeps the ten classes from Section 3.4 and adds two more, being an abstract Account class that holds the sign-in data customers and employees share, and a PaymentGateway interface for the external payment service.
+
+**Notation.** A minus sign (-) marks a private attribute and a plus sign (+) a public operation. An italic class name is abstract. A hollow triangle shows inheritance, a filled diamond shows composition (the part belongs to the whole), a solid arrow shows an association with its multiplicity at each end, and a dashed arrow shows that one class uses another.
+
+![Figure 3. UML Class diagram of the CMC Ticketing System](images/figure3-UML_Class_Diagram.png)
+
+*Figure 3. UML class diagram of the CMC Ticketing System*
 
 ## **4.4 Class Descriptions**
 4.4.1 -> 4.4.x
