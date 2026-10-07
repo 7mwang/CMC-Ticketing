@@ -1,7 +1,7 @@
 # Chinese Multi-Cinema (CMC) Ticketing System
 
 **Software Requirements Specification**  
-Version 1.0 · 24 September 2026
+Version 2.0 · 8 October 2026
 
 **Group #14:** Luke F., Matthew W., Joshua H.
 
@@ -17,6 +17,7 @@ Instructor: Gus Hanna, Ph.D. · Fall 2026
 | 10 Sep 2026 | Version 0.1 - Title page and outline        | Luke F., Matthew W.            | Filled out title page with project name, date, group number, and names.                                                         |
 | 17 Sep 2026 | Version 0.2 - Requirements draft            | Joshua H., Luke F., Matthew W. | Drafted Sections 1.1-3.1 and 3.5.                                                                                               |
 | 24 Sep 2026 | Version 1.0 - Complete SRS (Sections 1-3.5) | Joshua H., Luke F., Matthew W. | Completed Sections 1-3.5: functional requirements, use-case diagram and descriptions, classes, and non-functional requirements. |
+| 8 Oct 2026 | Version 2.0 - Software Design Specification | Joshua H., Luke F., Matthew W. | Added Section 4: system description, software architecture, UML class diagram, class descriptions, and development plan. |
 
 # Document Approval
 
@@ -90,21 +91,32 @@ The following Software Requirements Specification has been accepted and approved
     - [3.5.5 Maintainability](#355-maintainability)
     - [3.5.6 Portability](#356-portability)
     - [3.5.7 Usability and Accessibility](#357-usability-and-accessibility)
-    - [4. Software Design Specification]
-    - [4.1 System Description]
-    - [4.2 Software Architecture Overview]
-    - [4.3 UML Class Diagram]
-    - [4.4 Class Descriptions]
-    - 4.4.1 -> 4.4.x
-    - [4.5 Development Plan and Timeline]
-    - [4.5.1 Partitioning of Tasks]
-    - [4.5.2 Team Member Responsibilities]
+    [4. Software Design Specification](#4-software-design-specification)
+  - [4.1 System Description](#41-system-description)
+  - [4.2 Software Architecture Overview](#42-software-architecture-overview)
+  - [4.3 UML Class Diagram](#43-uml-class-diagram)
+  - [4.4 Class Descriptions](#44-class-descriptions)
+    - [4.4.1 Theater](#441-theater)
+    - [4.4.2 Auditorium](#442-auditorium)
+    - [4.4.3 Movie](#443-movie)
+    - [4.4.4 Showtime](#444-showtime)
+    - [4.4.5 TicketHold](#445-tickethold)
+    - [4.4.6 Ticket](#446-ticket)
+    - [4.4.7 Transaction](#447-transaction)
+    - [4.4.8 Account](#448-account)
+    - [4.4.9 CustomerAccount](#449-customeraccount)
+    - [4.4.10 EmployeeAccount](#4410-employeeaccount)
+    - [4.4.11 AuditRecord](#4411-auditrecord)
+    - [4.4.12 PaymentGateway](#4412-paymentgateway)
+  - [4.5 Development Plan and Timeline](#45-development-plan-and-timeline)
+    - [4.5.1 Partitioning of Tasks](#451-partitioning-of-tasks)
+    - [4.5.2 Team Member Responsibilities](#452-team-member-responsibilities)
 
 # 1. Introduction
 
 Chinese Multi-Cinema (CMC) operates 20 movie theaters in the San Diego area. Its current ticketing software handles basic sales, but years of patches have made it slow and unreliable, and customers have no convenient way to buy tickets ahead of time. CMC needs a single, modern ticketing system shared by every theater, kiosk, and box office, so that customers can buy tickets in a few minutes from anywhere and every employee sees the same showtimes, prices, and seat availability.
 
-The new CMC Ticketing System will let customers browse movies and showtimes, buy up to 20 tickets at a time, choose their seats in deluxe auditoriums, and receive tickets by email or as a printout, either as a guest or with an optional account that tracks loyalty points and membership. Theater employees will use the same system to sell, scan, and refund tickets, administrators will use it to manage movies, showtimes, and prices, and CMC management will use it to review sales across all locations. This document describes what the system must do and how well it must do it, not how it will be built.
+The new CMC Ticketing System will let customers browse movies and showtimes, buy up to 20 tickets at a time, choose their seats in deluxe auditoriums, and receive tickets by email or as a printout, either as a guest or with an optional account that tracks loyalty points and membership. Theater employees will use the same system to sell, scan, and refund tickets, administrators will use it to manage movies, showtimes, and prices, and CMC management will use it to review sales across all locations. Sections 1-3 describe what the system must do and how well it must do it; Section 4 describes how it will be built.
 
 ## 1.1 Purpose
 
@@ -176,7 +188,7 @@ The software product specified here is the **CMC Ticketing System**, a browser-b
 
 ## 1.5 Overview
 
-The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5).
+The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5). **Section 4 - Software Design Specification** describes how the system would be built: a system description (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5).
 
 # 2. General Description
 
@@ -873,17 +885,18 @@ The following quality requirements apply to the whole system and are stated in m
 | **NFR-U-01** | In usability testing, at least 90% of first-time participants shall complete a standard purchase without help. |
 | **NFR-U-02** | The median time to complete a standard purchase in usability testing shall not exceed 3 minutes.               |
 | **NFR-U-03** | Customer-facing pages shall meet WCAG 2.1 Level AA.                                                            |
-# **4\. Software Design Specification**
+
+# 4. Software Design Specification**
 
 This section describes how the CMC Ticketing System would be built. It is written for the developers who would implement and maintain the system, and it covers a short description of the system (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5).
 
-## **4.1 System Description**
+## 4.1 System Description**
 
 The CMC Ticketing System is a web-based ticketing system shared by all 20 Chinese Multi-Cinema theaters in San Diego. Customers use the website or a lobby kiosk to browse showtimes, buy up to 20 tickets, choose seats in deluxe auditoriums, and receive tickets by email or print, either as guests or with an optional account. Employees use the same system to sell, scan and refund tickets; administrators manage movies, showtimes and prices; and managers view sales reports.
 
 The design is object-oriented and uses a three-tier client-server architecture. All three sales channels are web browser clients that talk to one central server and one central database, so every theater, kiosk and box office sees the same showtimes, prices and seat availability (SI-03). The classes in Section 4.4 build on the conceptual classes in Section 3.4.
 
-## **4.2 Software Architecture Overview**
+## 4.2 Software Architecture Overview**
 
 Figure 2 shows the major components of the system (solid boxes), grouped into tiers (dashed boxes), and the connectors between them (arrows K1 to K5).
 
@@ -924,7 +937,7 @@ Figure 2 shows the major components of the system (solid boxes), grouped into ti
 
 **Example.** When a customer buys tickets on the website, the request travels over K1 to the Ticket Purchase module. The module holds the selected seats through the Data Access Layer (K2), sends the payment to the Payment Service (K3), saves the transaction and tickets (K2), and has the Email Service send the tickets to the customer (K4). Because every channel uses the same database, those seats immediately show as sold on the kiosks and at the box office.
 
-## **4.3 UML Class Diagram**
+## 4.3 UML Class Diagram**
 Figure 3 shows the system's classes and their attributes, operations and relationships. The design keeps the ten classes from Section 3.4 and adds two more, being an abstract Account class that holds the sign-in data customers and employees share, and a PaymentGateway interface for the external payment service.
 
 **Notation.** A minus sign (-) marks a private attribute and a plus sign (+) a public operation. An italic class name is abstract. A hollow triangle shows inheritance, a filled diamond shows composition (the part belongs to the whole), a solid arrow shows an association with its multiplicity at each end, and a dashed arrow shows that one class uses another.
@@ -933,7 +946,7 @@ Figure 3 shows the system's classes and their attributes, operations and relatio
 
 *Figure 3. UML class diagram of the CMC Ticketing System*
 
-## **4.4 Class Descriptions**
+## 4.4 Class Descriptions**
 
 Each class is described below. Data types match those detailed in Section 3.4: Integer, String, Decimal (money), DateTime, Boolean, and List or Map for collections. Some attributes use enumerated types (Enums), either directly or as part of a collection. Each Enum is restricted to a predefined set of options listed in the corresponding descriptions. Operations show their parameters in parentheses and their return type in the second column.
 
@@ -1098,7 +1111,7 @@ A permanent record of a refund, override, or price or schedule change (FR-39).
 |  |  |  |
 |  |  |  |
 
-## **4.5 Development Plan and Timeline**
+## 4.5 Development Plan and Timeline**
 
 ### **4.5.1 Partitioning of Tasks**
 | **#** | **Task** | **Description** | **Lead** | **Support** | **Target date**
@@ -1113,7 +1126,7 @@ A permanent record of a refund, override, or price or schedule change (FR-39).
 | 8 | something | blank | blank | blank | a set time |
 
 
-### **4.5.2 Team Member Responsibilities**
+### 4.5.2 Team Member Responsibilities**
 | **Member** | **Role** | **Tasks led** | **Responsibilities** |
 |     ---    |    ---   |      ---      |          ---         |
 | Luke F.| Role | Tasks | Responsibilities |
