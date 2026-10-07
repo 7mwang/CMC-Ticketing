@@ -1101,19 +1101,19 @@ A permanent record of a refund, override, or price or schedule change (FR-39).
 ## **4.5 Development Plan and Timeline**
 
 ### **4.5.1 Partitioning of Tasks**
-# | Task | Description | Lead | Support | Target Date |
-1 | something | blank | blank | blank | set time |
-2 | something | blank | blank | blank | a set time |
-3 | something | blank | blank | blank | a set time |
-4 | something | blank | blank | blank | a set time |
-5 | something | blank | blank | blank | a set time |
-6 | something | blank | blank | blank | a set time |
-7 | something | blank | blank | blank | a set time |
-8 | something | blank | blank | blank | a set time |
+| **#** | **Task** | **Description** | **Lead** | **Support** | **Target date**
+| 1 | something | blank | blank | blank | set time |
+| 2 | something | blank | blank | blank | a set time |
+| 3 | something | blank | blank | blank | a set time |
+| 4 | something | blank | blank | blank | a set time |
+| 5 | something | blank | blank | blank | a set time |
+| 6 | something | blank | blank | blank | a set time |
+| 7 | something | blank | blank | blank | a set time |
+| 8 | something | blank | blank | blank | a set time |
 
 
 ### **4.5.2 Team Member Responsibilities**
-Member | Role | Tasks led | Responsibilities |
-Luke F.| Role | Tasks | Responsibilities |
-Matthew W. | Role | Tasks | Responsibilities |
-Joshua H. | Role | Tasks | Responsibilities |
+| **Member** | **Role** | **Tasks led** | **Responsibilities** |
+| Luke F.| Role | Tasks | Responsibilities |
+| Matthew W. | Role | Tasks | Responsibilities |
+| Joshua H. | Role | Tasks | Responsibilities |
