@@ -577,7 +577,20 @@ Figure 1 shows every actor and use case of the CMC Ticketing System. Actors on t
 
 ## 3.4 Classes / Objects
 
-The following conceptual classes represent the main information the system manages. They describe required data and responsibilities without prescribing a programming language or final design.
+The following conceptual classes represent the main information the system manages. They describe required data and responsibilities without prescribing a programming language or final design. These class descriptions use several enumerated types (Enums), which are data types that can only take one value from a fixed set of allowed options. Named Enums such as `SeatStatus` and `TicketStatus` are used to keep attribute types clear and consistent.
+
+### Enumerated Types
+
+- AuditoriumType = {REGULAR, DELUXE}
+- ShowtimeStatus = {SCHEDULED, ON_SALE, CLOSED, CANCELLED}
+- SeatStatus = {AVAILABLE, HELD, SOLD}
+- TicketType = {ADULT, CHILD, STUDENT, SENIOR, MILITARY}
+- TicketStatus = {ISSUED, REDEEMED, REFUNDED}
+- TransactionType = {PURCHASE, REFUND, OVERRIDE}
+- TransactionStatus = {APPROVED, DECLINED, REFUNDED, VOIDED}
+- SalesChannel = {WEB, KIOSK, BOX_OFFICE}
+- MembershipType = {NONE, MEMBER}
+- Role = {BOX_OFFICE, ADMINISTRATOR, MANAGER}
 
 ### 3.4.1 Theater
 
@@ -606,7 +619,7 @@ A screening room within a theater.
 
 - auditoriumID : Integer
 - theaterID : Integer
-- type (Regular or Deluxe) : Enum
+- type (Regular or Deluxe) : AuditoriumType
 - capacity (150 or 75) : Integer
 - seatLayout (row and number of each deluxe seat) : String[][]
 
@@ -646,11 +659,11 @@ One screening of a movie in an auditorium, including the status of every seat fo
 - movieID : Integer
 - auditoriumID : Integer
 - startDateAndTime : DateTime
-- status (Scheduled, On Sale, Closed, Cancelled) : Enum
+- status (Scheduled, On Sale, Closed, Cancelled) : ShowtimeStatus
 - salesOpen (start − 14 days) : DateTime
 - salesClose (start + 10 minutes) : DateTime
 - seatsRemaining : Integer
-- deluxeSeatStatus (Available, Held, Sold) : Enum
+- deluxeSeatStatus (seat label -> Available, Held, Sold) : Map<String, SeatStatus>
 
 **3.4.4.2 Functions:**
 
@@ -689,9 +702,9 @@ Admission for one person to one showtime.
 - validationCode : String
 - showtimeID : Integer
 - seat : String
-- ticketType : Enum
+- ticketType (Adult, Child, Student, Senior, Military) : TicketType
 - pricePaid : Decimal
-- status (Issued, Redeemed, Refunded) : Enum
+- status (Issued, Redeemed, Refunded) : TicketStatus
 
 **3.4.6.2 Functions:**
 
@@ -708,14 +721,14 @@ A purchase, refund, or override.
 
 - transactionID : Integer
 - confirmationNumber : Integer
-- type (Purchase, Refund, Override) : Enum
+- type (Purchase, Refund, Override) : TransactionType
 - tickets : Ticket[]
 - subtotal : Decimal
 - fees : Decimal
 - total : Decimal
 - paymentToken : String
-- status : Enum
-- salesChannel (Web, Kiosk, Box Office) : Enum
+- status : TransactionStatus
+- salesChannel (Web, Kiosk, Box Office) : SalesChannel
 - timestamp : DateTime
 - satisfactionRating (1-5) : Integer
 
@@ -739,7 +752,7 @@ An optional customer account.
 - passwordHash : String
 - savedPaymentTokens : String
 - loyaltyPointBalance : Integer
-- membershipType : Enum
+- membershipType (None or Member) : MembershipType
 - membershipNumber : Integer
 - activeSessionID : Integer
 
@@ -760,7 +773,7 @@ A CMC staff account.
 - employeeID : Integer
 - name : String
 - home theater : Integer
-- role (Box Office, Administrator, Manager) : Enum
+- role (Box Office, Administrator, Manager) : Role
 - passwordHash: String
 
 **3.4.9.2 Functions:**
@@ -921,7 +934,169 @@ Figure 3 shows the system's classes and their attributes, operations and relatio
 *Figure 3. UML class diagram of the CMC Ticketing System*
 
 ## **4.4 Class Descriptions**
-4.4.1 -> 4.4.x
+
+Each class is described below. Data types match those detailed in Section 3.4: Integer, String, Decimal (money), DateTime, Boolean, and List or Map for collections. Some attributes use enumerated types (Enums), either directly or as part of a collection. Each Enum is restricted to a predefined set of options listed in the corresponding descriptions. Operations show their parameters in parentheses and their return type in the second column.
+
+### 4.4.1 Theater
+
+One of the 20 CMC theater locations. Each theater contains its own auditoriums.
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.2 Auditorium
+
+A screening room. Regular rooms sell 150 general-admission tickets, and deluxe rooms have 75 assigned seats.
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.3 Movie
+
+A film that CMC is showing, with review scores from the licensed review service.
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.4 Showtime
+
+One screening of a movie in an auditorium. It tracks the status of every seat, so all holds and sales go through it (FR-12).
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.5 TicketHold
+
+A five-minute reservation created when checkout begins (FR-11).
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.6 Ticket
+
+Admission for one person to one showtime, with a unique code that can be scanned once.
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.7 Transaction
+
+A purchase, refund or override. A purchase is recorded only after the payment is approved (FR-18, FR-19).
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.8 Account
+
+*Abstract class.* Abstract parent class for anyone who signs in. Only one session per account is allowed (FR-27).
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.9 CustomerAccount
+
+An optional account for returning customers (FR-23 to FR-28). Inherits from Account.
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.10 EmployeeAccount
+
+A CMC staff account. Its role decides which employee functions it can use (NFR-S-04). Inherits from Account.
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.11 AuditRecord
+
+A permanent record of a refund, override, or price or schedule change (FR-39).
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 4.4.12 PaymentGateway
+
+*Interface.* Interface to the outside payment service (SI-01). Keeping it as an interface allows CMC to change payment providers without changing other classes.
+
+| **Attribute / Operation** | **Type / Returns** | **Description** |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
 
 ## **4.5 Development Plan and Timeline**
 
