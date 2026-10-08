@@ -954,162 +954,143 @@ Each class is described below. Data types match those detailed in Section 3.4: I
 
 One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+### 4.4.1 Theater
+
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - theaterID | Integer | Unique ID |
+| - name | String | Theater name shown to customers |
+| - address | String | Street address |
+| - auditoriums | List\<Auditorium> | The theater's screening rooms |
+| + getShowtimes(date: Date) | List\<Showtime> | Returns the showtimes at this theater on the given date (FR-01). |
 
 ### 4.4.2 Auditorium
 
-A screening room. Regular rooms sell 150 general-admission tickets, and deluxe rooms have 75 assigned seats.
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - auditoriumID | Integer | Unique ID |
+| - type | AuditoriumType | REGULAR or DELUXE |
+| - capacity | Integer | 150 for regular, 75 for deluxe |
+| - seatLabels | List\<String> | Seat names such as "F12" (deluxe only) |
+| + isDeluxe() | Boolean | True if seats are assigned (FR-09). |
 
 ### 4.4.3 Movie
 
-A film that CMC is showing, with review scores from the licensed review service.
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - movieID | Integer | Unique ID |
+| - title | String | Movie title |
+| - runtime | Integer | Length in minutes |
+| - mpaaRating | String | MPAA rating, e.g., PG-13 |
+| - reviewScores | Integer[] | Audience and critic scores (FR-06) |
+| + updateReviewScores() | void | Gets the latest scores from the review service; keeps the old scores if it does not respond. |
 
 ### 4.4.4 Showtime
 
-One screening of a movie in an auditorium. It tracks the status of every seat, so all holds and sales go through it (FR-12).
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - showtimeID | Integer | Unique ID |
+| - movie | Movie | The movie being shown |
+| - auditorium | Auditorium | Auditorium where the movie is shown |
+| - startTime | DateTime | Scheduled start time |
+| - status | ShowtimeStatus | SCHEDULED, ON_SALE, CLOSED or CANCELLED |
+| - seatStatus | Map\<String, SeatStatus> | AVAILABLE, HELD or SOLD for each seat |
+| + isOnSale(now: DateTime) | Boolean | True from 14 days before the start until 10 minutes after (FR-04, FR-05). |
+| + getSeatsRemaining() | Integer | Number of unsold seats (FR-02) |
+| + holdSeats(seats: List\<String>) | Boolean | Marks the seats HELD; returns false if any is already held or sold. |
+| + releaseSeats(seats: List\<String>) | void | Makes held or refunded seats available again (FR-13). |
+| + cancel() | void | Cancels the showtime and flags its tickets for refund (FR-40). |
 
 ### 4.4.5 TicketHold
 
-A five-minute reservation created when checkout begins (FR-11).
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - holdID | Integer | Unique ID |
+| - showtime | Showtime | The showtime being held |
+| - ticketTypes | List\<TicketType> | Ticket type for each ticket (at most 20, FR-08) |
+| - seats | List\<String> | Held seats (deluxe only) |
+| - expiresAt | DateTime | Creation time plus 5 minutes |
+| + isExpired(now: DateTime) | Boolean | True after expiresAt |
+| + release() | void | Returns the held seats to the showtime (FR-13). |
 
 ### 4.4.6 Ticket
 
-Admission for one person to one showtime, with a unique code that can be scanned once.
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - ticketID | Integer | Unique ID |
+| - showtime | Showtime | Showtime associated with the ticket |
+| - seat | String | Assigned seat, or empty for general admission |
+| - type | TicketType | ADULT, CHILD, STUDENT, SENIOR or MILITARY |
+| - price | Decimal | Price paid |
+| - validationCode | String | Random code printed as a QR code (FR-20) |
+| - status | TicketStatus | ISSUED, REDEEMED or REFUNDED |
+| + validate(showtimeID: Integer) | Boolean | Redeems the ticket on its first scan; rejects used, refunded or wrong-showtime tickets (FR-31, FR-32). |
+| + refund() | void | Marks the ticket refunded and frees its seat (FR-33). |
 
 ### 4.4.7 Transaction
 
-A purchase, refund or override. A purchase is recorded only after the payment is approved (FR-18, FR-19).
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - transactionID | Integer | Unique ID |
+| - confirmationNumber | String | Number shown to the customer |
+| - type | TransactionType | PURCHASE, REFUND or OVERRIDE |
+| - tickets | List\<Ticket> | Tickets in the transaction (1 to 20) |
+| - total | Decimal | Amount charged or refunded |
+| - paymentToken | String | Payment-service token; no card numbers are stored |
+| - channel | SalesChannel | WEB, KIOSK or BOX_OFFICE |
+| - timestamp | DateTime | When it was recorded |
+| + processPayment(gateway: PaymentGateway) | Boolean | Sends the total to the payment service; true if approved. |
+| + issueTickets(hold: TicketHold) | List\<Ticket> | Creates the tickets and marks the held seats sold. |
+| + getReceipt() | String | Returns the receipt for the screen, email or printer. |
 
 ### 4.4.8 Account
 
-*Abstract class.* Abstract parent class for anyone who signs in. Only one session per account is allowed (FR-27).
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - accountID | Integer | Unique ID |
+| - email | String | Sign-in name |
+| - passwordHash | String | Hashed password, never plain text (NFR-S-02) |
+| - sessionID | String | Current session; signing in elsewhere replaces it. |
+| + signIn(email: String, password: String) | Boolean | Checks the password and starts a new session. |
+| + signOut() | void | Ends the session |
 
 ### 4.4.9 CustomerAccount
 
-An optional account for returning customers (FR-23 to FR-28). Inherits from Account.
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - name | String | Customer's name |
+| - loyaltyPoints | Integer | Current point balance |
+| - membership | MembershipType | NONE or MEMBER |
+| - savedPaymentTokens | List\<String> | Saved payment methods, stored as tokens only |
+| + getPurchaseHistory() | List\<Transaction> | Past and upcoming purchases (FR-24) |
+| + addLoyaltyPoints(t: Transaction) | Integer | Adds points for a purchase and returns the new balance (FR-25). |
 
 ### 4.4.10 EmployeeAccount
 
-A CMC staff account. Its role decides which employee functions it can use (NFR-S-04). Inherits from Account.
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - name | String | Employee's name |
+| - homeTheater | Theater | Theater where the employee works |
+| - role | Role | BOX_OFFICE, ADMINISTRATOR or MANAGER |
+| + hasPermission(action: String) | Boolean | Checks the role before any employee function. |
 
 ### 4.4.11 AuditRecord
 
-A permanent record of a refund, override, or price or schedule change (FR-39).
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| - recordID | Integer | Unique ID |
+| - employee | EmployeeAccount | Employee who performed the action |
+| - action | String | Action that was performed |
+| - reason | String | Reason entered by the employee |
+| - timestamp | DateTime | Date and time when the record was created |
+| + create(employee: EmployeeAccount, action: String, reason: String) | AuditRecord | Creates a record; records cannot be edited or deleted. |
 
 ### 4.4.12 PaymentGateway
 
-*Interface.* Interface to the outside payment service (SI-01). Keeping it as an interface allows CMC to change payment providers without changing other classes.
-
-| **Attribute / Operation** | **Type / Returns** | **Description** |
+| Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
+| + authorize(amount: Decimal, paymentToken: String) | Boolean | Requests a charge; true if approved. |
+| + refund(paymentToken: String, amount: Decimal) | Boolean | Requests a refund; true if approved. |
 
 ## 4.5 Development Plan and Timeline
 
