@@ -91,7 +91,7 @@ The following Software Requirements Specification has been accepted and approved
     - [3.5.5 Maintainability](#355-maintainability)
     - [3.5.6 Portability](#356-portability)
     - [3.5.7 Usability and Accessibility](#357-usability-and-accessibility)
-    [4. Software Design Specification](#4-software-design-specification)
+  - [4. Software Design Specification](#4-software-design-specification)
   - [4.1 System Description](#41-system-description)
   - [4.2 Software Architecture Overview](#42-software-architecture-overview)
   - [4.3 UML Class Diagram](#43-uml-class-diagram)
@@ -332,7 +332,7 @@ Functional requirements are grouped by feature. Each feature follows the templat
 
 **3.2.2.1 Introduction.** Lets a customer choose ticket types and quantities (and seats, for deluxe showings) and reserves them while the customer pays.
 
-**3.2.2.2 Inputs.** Showtime, ticket types (adult, child, student, senior, military/veteran), quantities, and deluxe seat selections.
+**3.2.2.2 Inputs.** Showtime, ticket types (ADULT, CHILD, STUDENT, SENIOR, MILITARY), quantities, and deluxe seat selections.
 
 **3.2.2.3 Processing.**
 
@@ -714,7 +714,7 @@ Admission for one person to one showtime.
 - validationCode : String
 - showtimeID : Integer
 - seat : String
-- ticketType (Adult, Child, Student, Senior, Military) : TicketType
+- ticketType (ADULT, CHILD, STUDENT, SENIOR, MILITARY) : TicketType
 - pricePaid : Decimal
 - status (Issued, Redeemed, Refunded) : TicketStatus
 
@@ -904,7 +904,7 @@ Figure 2 shows the major components of the system (solid boxes), grouped into ti
 
 *Figure 2. Software architecture diagram of the CMC Ticketing System*
 
-**Components.** Table 4-1 describes each component in Figure 2\.
+**Components.** Table 4-1 describes each component in Figure 2.
 
 **Table 4-1.** *Components*
 
@@ -938,7 +938,7 @@ Figure 2 shows the major components of the system (solid boxes), grouped into ti
 **Example.** When a customer buys tickets on the website, the request travels over K1 to the Ticket Purchase module. The module holds the selected seats through the Data Access Layer (K2), sends the payment to the Payment Service (K3), saves the transaction and tickets (K2), and has the Email Service send the tickets to the customer (K4). Because every channel uses the same database, those seats immediately show as sold on the kiosks and at the box office.
 
 ## 4.3 UML Class Diagram
-Figure 3 shows the system's classes and their attributes, operations and relationships. The design keeps the ten classes from Section 3.4 and adds two more, being an abstract Account class that holds the sign-in data customers and employees share, and a PaymentGateway interface for the external payment service.
+Figure 3 shows the system's classes and their attributes, operations and relationships. The design keeps the ten classes from Section 3.4 and adds two more: an abstract Account class that holds the sign-in data customers and employees share, and a PaymentGateway interface for the external payment service.
 
 **Notation.** A minus sign (-) marks a private attribute and a plus sign (+) a public operation. An italic class name is abstract. A hollow triangle shows inheritance, a filled diamond shows composition (the part belongs to the whole), a solid arrow shows an association with its multiplicity at each end, and a dashed arrow shows that one class uses another.
 
@@ -953,8 +953,6 @@ Each class is described below. Data types match those detailed in Section 3.4: I
 ### 4.4.1 Theater
 
 One of the 20 CMC theater locations. Each theater contains its own auditoriums.
-
-### 4.4.1 Theater
 
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
@@ -981,7 +979,7 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | - movieID | Integer | Unique ID |
 | - title | String | Movie title |
 | - runtime | Integer | Length in minutes |
-| - mpaaRating | String | MPAA rating, e.g., PG-13 |
+| - rating | String | MPAA rating, e.g., PG-13 |
 | - reviewScores | Integer[] | Audience and critic scores (FR-06) |
 | + updateReviewScores() | void | Gets the latest scores from the review service; keeps the old scores if it does not respond. |
 
@@ -1094,7 +1092,7 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 
 ## 4.5 Development Plan and Timeline
 
-### **4.5.1 Partitioning of Tasks**
+### 4.5.1 Partitioning of Tasks
 | **#** | **Task** | **Description** | **Lead** | **Support** | **Target date**
 |---|    ---    |  ---  |  ---  |  ---  |     ---    |
 | 1 | something | blank | blank | blank | a set time |
