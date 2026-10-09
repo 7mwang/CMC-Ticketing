@@ -1093,21 +1093,22 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 ## 4.5 Development Plan and Timeline
 
 ### 4.5.1 Partitioning of Tasks
-| **#** | **Task** | **Description** | **Lead** | **Support** | **Target date**
-|---|    ---    |  ---  |  ---  |  ---  |     ---    |
-| 1 | something | blank | blank | blank | a set time |
-| 2 | something | blank | blank | blank | a set time |
-| 3 | something | blank | blank | blank | a set time |
-| 4 | something | blank | blank | blank | a set time |
-| 5 | something | blank | blank | blank | a set time |
-| 6 | something | blank | blank | blank | a set time |
-| 7 | something | blank | blank | blank | a set time |
-| 8 | something | blank | blank | blank | a set time |
 
+| **#** | **Task** | **Description** | **Lead** | **Support** | **Target date** |
+|---|---|---|---|---|---|
+| 1 | Project setup and database | Set up the repository and coding standards; create the central database from the classes in Section 4.4. | Joshua H. | All | 16 Oct 2026 |
+| 2 | Browsing module | Theater, Auditorium, Movie and Showtime classes; showtime search, seats remaining and review scores. | Matthew W. | Luke F. | 23 Oct 2026 |
+| 3 | Ticket Purchase module | TicketHold, Ticket, Transaction and PaymentGateway; five-minute holds, payment and ticket emails. | Luke F. | Joshua H. | 6 Nov 2026 |
+| 4 | Accounts module | Account, CustomerAccount and EmployeeAccount; sign-in, loyalty points and membership. | Joshua H. | Matthew W. | 6 Nov 2026 |
+| 5 | Box Office and Administration modules | Ticket scanning and refunds; managing schedules and prices; AuditRecord. | Joshua H. | Luke F. | 20 Nov 2026 |
+| 6 | User interface and reports | Customer website, lobby kiosk and employee screens; sales and revenue reports. | Matthew W. | Joshua H. | 20 Nov 2026 |
+| 7 | Testing | Write test cases from the functional requirements and use cases; fix defects found. | Luke F. | All | 4 Dec 2026 |
+| 8 | Final SRS and submission | Combine all sections, proofread, export the PDF and push it to GitHub. | All | - | 11 Dec 2026 |
 
 ### 4.5.2 Team Member Responsibilities
+
 | **Member** | **Role** | **Tasks led** | **Responsibilities** |
-|     ---    |    ---   |      ---      |          ---         |
-| Luke F.| Role | Tasks | Responsibilities |
-| Matthew W. | Role | Tasks | Responsibilities |
-| Joshua H. | Role | Tasks | Responsibilities |
+|---|---|---|---|
+| Luke F. | Back-end developer (sales) | 3, 7 | Ticket holds, payment and ticket issuing; leads testing and tracks defects. |
+| Matthew W. | Front-end developer | 2, 6 | Browsing module, customer website, kiosk and employee screens, and reports. |
+| Joshua H. | Database and security developer | 1, 4, 5 | Repository and database setup, accounts and sign-in, box office and administration functions, audit records. |
