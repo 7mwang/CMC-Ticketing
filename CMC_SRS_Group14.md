@@ -1103,7 +1103,7 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | 5 | Box Office and Administration modules | Ticket scanning and refunds; managing schedules and prices; AuditRecord. | Joshua H. | Luke F. | 20 Nov 2026 |
 | 6 | User interface and reports | Customer website, lobby kiosk and employee screens; sales and revenue reports. | Matthew W. | Joshua H. | 20 Nov 2026 |
 | 7 | Testing | Write test cases from the functional requirements and use cases; fix defects found. | Luke F. | All | 4 Dec 2026 |
-| 8 | Final SRS and submission | Combine all sections, proofread, export the PDF and push it to GitHub. | All | - | 11 Dec 2026 |
+| 8 | System integration and deployment | Integrate the modules, deploy to all 20 theaters and verify shared seat inventory. | All | - | 11 Dec 2026 |
 
 ### 4.5.2 Team Member Responsibilities
 
