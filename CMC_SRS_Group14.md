@@ -91,7 +91,7 @@ The following Software Requirements Specification has been accepted and approved
     - [3.5.5 Maintainability](#355-maintainability)
     - [3.5.6 Portability](#356-portability)
     - [3.5.7 Usability and Accessibility](#357-usability-and-accessibility)
-  - [4. Software Design Specification](#4-software-design-specification)
+- [4. Software Design Specification](#4-software-design-specification)
   - [4.1 System Description](#41-system-description)
   - [4.2 Software Architecture Overview](#42-software-architecture-overview)
   - [4.3 UML Class Diagram](#43-uml-class-diagram)
