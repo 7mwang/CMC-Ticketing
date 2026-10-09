@@ -943,9 +943,9 @@ Figure 3 shows the system's classes and their attributes, operations and relatio
 
 **Notation.** A minus sign (-) marks a private attribute and a plus sign (+) a public operation. An italic class name is abstract. A hollow triangle shows inheritance, a filled diamond shows composition (the part belongs to the whole), a solid arrow shows an association with its multiplicity at each end, and a dashed arrow shows that one class uses another.
 
-![Figure 3. UML Class diagram of the CMC Ticketing System](images/figure3-UML_Class_Diagram.png)
-
 **Relationships.** CustomerAccount and EmployeeAccount inherit from the abstract Account class. A Theater contains one or more Auditoriums. Each Showtime shows one Movie in one Auditorium. A TicketHold reserves seats in one Showtime, and each Ticket admits one person to one Showtime. A Transaction includes 1 to 20 Tickets; it uses a TicketHold to issue those tickets and the PaymentGateway to take payment. A CustomerAccount can place any number of Transactions, and an EmployeeAccount creates an AuditRecord for each sensitive action.
+
+![Figure 3. UML Class diagram of the CMC Ticketing System](images/figure3-UML_Class_Diagram.png)
 
 *Figure 3. UML class diagram of the CMC Ticketing System*
 
@@ -1117,13 +1117,13 @@ A permanent record of a refund, override, or price or schedule change (FR-39).
 
 ## 4.5 Development Plan and Timeline
 
-Group 14 will develop the system in eight tasks between October and early December 2026.  The order follows the design: the database first, then the server modules from Figure 2, then the user interface, testing, and integration.
+We will develop the system in eight tasks between October and early December 2026. The team will plan the data model during setup and build the database alongside the server modules from Figure 2, followed by the user interface, testing, and integration.
 
 ### 4.5.1 Partitioning of Tasks
 
 | **#** | **Task** | **Description** | **Lead** | **Support** | **Target date** |
 |---|---|---|---|---|---|
-| 1 | Project setup and database | Set up the repository and coding standards; create the central database from the classes in Section 4.4. | Joshua H. | All | 16 Oct 2026 |
+| 1 | Project setup and data planning | Set up the repository and coding standards; outline the data model from the classes in Section 4.4. | Joshua H. | All | 16 Oct 2026 |
 | 2 | Browsing module | Theater, Auditorium, Movie and Showtime classes; showtime search, seats remaining and review scores. | Matthew W. | Luke F. | 23 Oct 2026 |
 | 3 | Ticket Purchase module | TicketHold, Ticket, Transaction and PaymentGateway; five-minute holds, payment and ticket emails. | Luke F. | Joshua H. | 6 Nov 2026 |
 | 4 | Accounts module | Account, CustomerAccount and EmployeeAccount; sign-in, loyalty points and membership. | Joshua H. | Matthew W. | 6 Nov 2026 |
@@ -1138,4 +1138,4 @@ Group 14 will develop the system in eight tasks between October and early Decemb
 |---|---|---|---|
 | Luke F. | Back-end developer (sales) | 3, 7 | Ticket holds, payment and ticket issuing; leads testing and tracks defects. |
 | Matthew W. | Front-end developer | 2, 6 | Browsing module, customer website, kiosk and employee screens, and reports. |
-| Joshua H. | Database and security developer | 1, 4, 5 | Repository and database setup, accounts and sign-in, box office and administration functions, audit records. |
+| Joshua H. | Database and security developer | 1, 4, 5 | Repository setup and data planning, database work alongside the modules, accounts and sign-in, box office and administration functions, audit records. |
