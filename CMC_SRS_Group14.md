@@ -938,11 +938,14 @@ Figure 2 shows the major components of the system (solid boxes), grouped into ti
 **Example.** When a customer buys tickets on the website, the request travels over K1 to the Ticket Purchase module. The module holds the selected seats through the Data Access Layer (K2), sends the payment to the Payment Service (K3), saves the transaction and tickets (K2), and has the Email Service send the tickets to the customer (K4). Because every channel uses the same database, those seats immediately show as sold on the kiosks and at the box office.
 
 ## 4.3 UML Class Diagram
+
 Figure 3 shows the system's classes and their attributes, operations and relationships. The design keeps the ten classes from Section 3.4 and adds two more: an abstract Account class that holds the sign-in data customers and employees share, and a PaymentGateway interface for the external payment service.
 
 **Notation.** A minus sign (-) marks a private attribute and a plus sign (+) a public operation. An italic class name is abstract. A hollow triangle shows inheritance, a filled diamond shows composition (the part belongs to the whole), a solid arrow shows an association with its multiplicity at each end, and a dashed arrow shows that one class uses another.
 
 ![Figure 3. UML Class diagram of the CMC Ticketing System](images/figure3-UML_Class_Diagram.png)
+
+**Relationships.** CustomerAccount and EmployeeAccount inherit from the abstract Account class. A Theater contains one or more Auditoriums. Each Showtime shows one Movie in one Auditorium. A TicketHold reserves seats in one Showtime, and each Ticket admits one person to one Showtime. A Transaction includes 1 to 20 Tickets; it uses a TicketHold to issue those tickets and the PaymentGateway to take payment. A CustomerAccount can place any number of Transactions, and an EmployeeAccount creates an AuditRecord for each sensitive action.
 
 *Figure 3. UML class diagram of the CMC Ticketing System*
 
@@ -964,6 +967,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 
 ### 4.4.2 Auditorium
 
+A screening room in a theater. Regular rooms sell 150 general-admission tickets, and deluxe rooms have 75 assigned seats.
+
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
 | - auditoriumID | Integer | Unique ID |
@@ -973,6 +978,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | + isDeluxe() | Boolean | True if seats are assigned (FR-09). |
 
 ### 4.4.3 Movie
+
+A film that CMC is showing, with review scores from the licensed review service.
 
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
@@ -984,6 +991,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | + updateReviewScores() | void | Gets the latest scores from the review service; keeps the old scores if it does not respond. |
 
 ### 4.4.4 Showtime
+
+One screening of a movie in an auditorium. It tracks the status of every seat, so all holds and sales go through it (FR-12).
 
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
@@ -1001,6 +1010,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 
 ### 4.4.5 TicketHold
 
+A five-minute reservation created when checkout begins (FR-11).
+
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
 | - holdID | Integer | Unique ID |
@@ -1012,6 +1023,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | + release() | void | Returns the held seats to the showtime (FR-13). |
 
 ### 4.4.6 Ticket
+
+Admission for one person to one showtime, with a unique code that can be scanned once.
 
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
@@ -1026,6 +1039,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | + refund() | void | Marks the ticket refunded and frees its seat (FR-33). |
 
 ### 4.4.7 Transaction
+
+A purchase, refund or override. A purchase is recorded only after the payment is approved (FR-18, FR-19).
 
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
@@ -1043,6 +1058,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 
 ### 4.4.8 Account
 
+*Abstract class.* The parent class for anyone who signs in. It holds the sign-in data that customers and employees share, and only one session per account is allowed (FR-27).
+
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
 | - accountID | Integer | Unique ID |
@@ -1053,6 +1070,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | + signOut() | void | Ends the session |
 
 ### 4.4.9 CustomerAccount
+
+An optional account for returning customers (FR-23 to FR-28). Inherits from Account.
 
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
@@ -1065,6 +1084,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 
 ### 4.4.10 EmployeeAccount
 
+A CMC staff account. Its role decides which employee functions it can use (NFR-S-04). Inherits from Account.
+
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
 | - name | String | Employee's name |
@@ -1073,6 +1094,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | + hasPermission(action: String) | Boolean | Checks the role before any employee function. |
 
 ### 4.4.11 AuditRecord
+
+A permanent record of a refund, override, or price or schedule change (FR-39).
 
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
@@ -1085,12 +1108,16 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 
 ### 4.4.12 PaymentGateway
 
+*Interface.* Connects the system to the outside payment service (SI-01). It has no attributes; keeping it as an interface lets CMC change payment providers without changing other classes.
+
 | Attribute / Operation | Type / Returns | Description |
 | --- | --- | --- |
 | + authorize(amount: Decimal, paymentToken: String) | Boolean | Requests a charge; true if approved. |
 | + refund(paymentToken: String, amount: Decimal) | Boolean | Requests a refund; true if approved. |
 
 ## 4.5 Development Plan and Timeline
+
+Group 14 will develop the system in eight tasks between October and early December 2026.  The order follows the design: the database first, then the server modules from Figure 2, then the user interface, testing, and integration.
 
 ### 4.5.1 Partitioning of Tasks
 
