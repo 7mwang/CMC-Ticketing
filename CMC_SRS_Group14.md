@@ -675,7 +675,7 @@ One screening of a movie in an auditorium, including the status of every seat fo
 - salesOpen (start − 14 days) : DateTime
 - salesClose (start + 10 minutes) : DateTime
 - seatsRemaining : Integer
-- deluxeSeatStatus (seat label -> Available, Held, Sold) : Map<String, SeatStatus>
+- deluxeSeatStatus (seat label -> Available, Held, Sold) : `Map<String, SeatStatus>`
 
 **3.4.4.2 Functions:**
 
@@ -962,8 +962,8 @@ One of the 20 CMC theater locations. Each theater contains its own auditoriums.
 | - theaterID | Integer | Unique ID |
 | - name | String | Theater name shown to customers |
 | - address | String | Street address |
-| - auditoriums | List\<Auditorium> | The theater's screening rooms |
-| + getShowtimes(date: Date) | List\<Showtime> | Returns the showtimes at this theater on the given date (FR-01). |
+| - auditoriums | `List<Auditorium>` | The theater's screening rooms |
+| + getShowtimes(date: Date) | `List<Showtime>` | Returns the showtimes at this theater on the given date (FR-01). |
 
 ### 4.4.2 Auditorium
 
@@ -974,7 +974,7 @@ A screening room in a theater. Regular rooms sell 150 general-admission tickets,
 | - auditoriumID | Integer | Unique ID |
 | - type | AuditoriumType | REGULAR or DELUXE |
 | - capacity | Integer | 150 for regular, 75 for deluxe |
-| - seatLabels | List\<String> | Seat names such as "F12" (deluxe only) |
+| - seatLabels | `List<String>` | Seat names such as "F12" (deluxe only) |
 | + isDeluxe() | Boolean | True if seats are assigned (FR-09). |
 
 ### 4.4.3 Movie
@@ -1001,11 +1001,11 @@ One screening of a movie in an auditorium. It tracks the status of every seat, s
 | - auditorium | Auditorium | Auditorium where the movie is shown |
 | - startTime | DateTime | Scheduled start time |
 | - status | ShowtimeStatus | SCHEDULED, ON_SALE, CLOSED or CANCELLED |
-| - seatStatus | Map\<String, SeatStatus> | AVAILABLE, HELD or SOLD for each seat |
+| - seatStatus | `Map<String, SeatStatus>` | AVAILABLE, HELD or SOLD for each seat |
 | + isOnSale(now: DateTime) | Boolean | True from 14 days before the start until 10 minutes after (FR-04, FR-05). |
 | + getSeatsRemaining() | Integer | Number of unsold seats (FR-02) |
-| + holdSeats(seats: List\<String>) | Boolean | Marks the seats HELD; returns false if any is already held or sold. |
-| + releaseSeats(seats: List\<String>) | void | Makes held or refunded seats available again (FR-13). |
+| + holdSeats(seats: `List<String>`) | Boolean | Marks the seats HELD; returns false if any is already held or sold. |
+| + releaseSeats(seats: `List<String>`) | void | Makes held or refunded seats available again (FR-13). |
 | + cancel() | void | Cancels the showtime and flags its tickets for refund (FR-40). |
 
 ### 4.4.5 TicketHold
@@ -1016,8 +1016,8 @@ A five-minute reservation created when checkout begins (FR-11).
 | --- | --- | --- |
 | - holdID | Integer | Unique ID |
 | - showtime | Showtime | The showtime being held |
-| - ticketTypes | List\<TicketType> | Ticket type for each ticket (at most 20, FR-08) |
-| - seats | List\<String> | Held seats (deluxe only) |
+| - ticketTypes | `List<TicketType>` | Ticket type for each ticket (at most 20, FR-08) |
+| - seats | `List<String>` | Held seats (deluxe only) |
 | - expiresAt | DateTime | Creation time plus 5 minutes |
 | + isExpired(now: DateTime) | Boolean | True after expiresAt |
 | + release() | void | Returns the held seats to the showtime (FR-13). |
@@ -1047,13 +1047,13 @@ A purchase, refund or override. A purchase is recorded only after the payment is
 | - transactionID | Integer | Unique ID |
 | - confirmationNumber | String | Number shown to the customer |
 | - type | TransactionType | PURCHASE, REFUND or OVERRIDE |
-| - tickets | List\<Ticket> | Tickets in the transaction (1 to 20) |
+| - tickets | `List<Ticket>` | Tickets in the transaction (1 to 20) |
 | - total | Decimal | Amount charged or refunded |
 | - paymentToken | String | Payment-service token; no card numbers are stored |
 | - channel | SalesChannel | WEB, KIOSK or BOX_OFFICE |
 | - timestamp | DateTime | When it was recorded |
 | + processPayment(gateway: PaymentGateway) | Boolean | Sends the total to the payment service; true if approved. |
-| + issueTickets(hold: TicketHold) | List\<Ticket> | Creates the tickets and marks the held seats sold. |
+| + issueTickets(hold: TicketHold) | `List<Ticket>` | Creates the tickets and marks the held seats sold. |
 | + getReceipt() | String | Returns the receipt for the screen, email or printer. |
 
 ### 4.4.8 Account
@@ -1078,8 +1078,8 @@ An optional account for returning customers (FR-23 to FR-28). Inherits from Acco
 | - name | String | Customer's name |
 | - loyaltyPoints | Integer | Current point balance |
 | - membership | MembershipType | NONE or MEMBER |
-| - savedPaymentTokens | List\<String> | Saved payment methods, stored as tokens only |
-| + getPurchaseHistory() | List\<Transaction> | Past and upcoming purchases (FR-24) |
+| - savedPaymentTokens | `List<String>` | Saved payment methods, stored as tokens only |
+| + getPurchaseHistory() | `List<Transaction>` | Past and upcoming purchases (FR-24) |
 | + addLoyaltyPoints(t: Transaction) | Integer | Adds points for a purchase and returns the new balance (FR-25). |
 
 ### 4.4.10 EmployeeAccount
@@ -1117,7 +1117,7 @@ A permanent record of a refund, override, or price or schedule change (FR-39).
 
 ## 4.5 Development Plan and Timeline
 
-We will develop the system in eight tasks between October and early December 2026. The team will plan the data model during setup and build the database alongside the server modules from Figure 2, followed by the user interface, testing, and integration.
+We will develop the system in eight tasks between October and early December 2026. We will plan the data model during setup and build the database alongside the server modules from Figure 2, followed by the user interface, testing, and integration.
 
 ### 4.5.1 Partitioning of Tasks
 
