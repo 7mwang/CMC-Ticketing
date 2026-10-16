@@ -1139,3 +1139,21 @@ We will develop the system in eight tasks between October and early December 202
 | Luke F. | Back-end developer (sales) | 3, 7 | Ticket holds, payment and ticket issuing; leads testing and tracks defects. |
 | Matthew W. | Front-end developer | 2, 6 | Browsing module, customer website, kiosk and employee screens, and reports. |
 | Joshua H. | Database and security developer | 1, 4, 5 | Repository setup and data planning, database work alongside the modules, accounts and sign-in, box office and administration functions, audit records. |
+
+# 5. Test Plan
+
+## 5.1 Purpose, Scope, and Test Strategy
+
+The plan structure follows the scope, responsibilities, success criteria and risk topics in [Atlassian's test-plan guide](https://www.atlassian.com/software/confluence/resources/guides/how-to/test-plan#how-to). Entry/exit gates, environment planning and suspension rules also reflect the supplied [GeeksforGeeks test-plan article](https://www.geeksforgeeks.org/software-testing/test-plan-software-testing/). All CMC inputs and expected results below are derived from this SRS or explicitly identified as proposed test conventions.
+
+## 5.2 Design Review and UML Test Scope
+
+## 5.3 Environment, Fixtures, and Test Oracles
+
+## 5.4 Test Sets and Requirement Coverage
+
+## 5.5 Ten Detailed Test Case Samples
+
+## 5.6 Additional Feature and Quality Coverage
+
+## 5.7 Entry, Exit, Suspension, and Reporting Criteria
