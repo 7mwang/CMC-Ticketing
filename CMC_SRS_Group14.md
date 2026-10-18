@@ -111,6 +111,7 @@ The following Software Requirements Specification has been accepted and approved
   - [4.5 Development Plan and Timeline](#45-development-plan-and-timeline)
     - [4.5.1 Partitioning of Tasks](#451-partitioning-of-tasks)
     - [4.5.2 Team Member Responsibilities](#452-team-member-responsibilities)
+  - [4.6 Design Updates Since Version 2.0](#46-design-updates-since-version-20)
 
 # 1. Introduction
 
@@ -1002,7 +1003,7 @@ One screening of a movie in an auditorium. It tracks the status of every seat, s
 | - startTime | DateTime | Scheduled start time |
 | - status | ShowtimeStatus | SCHEDULED, ON_SALE, CLOSED or CANCELLED |
 | - seatStatus | `Map<String, SeatStatus>` | AVAILABLE, HELD or SOLD for each seat |
-| + isOnSale(now: DateTime) | Boolean | True from 14 days before the start until 10 minutes after (FR-04, FR-05). |
+| + isOnSale(now: DateTime) | Boolean | True from exactly 14 days before the start up to, but not including, 10 minutes after the start (FR-04, FR-05). |
 | + getSeatsRemaining() | Integer | Number of unsold seats (FR-02) |
 | + holdSeats(seats: `List<String>`) | Boolean | Marks the seats HELD; returns false if any is already held or sold. |
 | + releaseSeats(seats: `List<String>`) | void | Makes held or refunded seats available again (FR-13). |
@@ -1139,6 +1140,21 @@ We will develop the system in eight tasks between October and early December 202
 | Luke F. | Back-end developer (sales) | 3, 7 | Ticket holds, payment and ticket issuing; leads testing and tracks defects. |
 | Matthew W. | Front-end developer | 2, 6 | Browsing module, customer website, kiosk and employee screens, and reports. |
 | Joshua H. | Database and security developer | 1, 4, 5 | Repository setup and data planning, database work alongside the modules, accounts and sign-in, box office and administration functions, audit records. |
+
+## 4.6 Design Updates Since Version 2.0
+
+We reviewed the architecture (Figure 2) and the class diagram (Figure 3) against the test plan in Section 5. **No classes, attributes, operations, or relationships were added or removed**, so Figures 2 and 3 are unchanged in this version. Every component and class that the test plan targets already exists in the design, and several existing design choices are what make the planned tests possible:
+
+- **PaymentGateway is an interface (4.4.12).** Unit and integration tests replace the real payment service with a test version (*FakePaymentGateway*) that approves, declines, or times out on demand, so payment failures can be tested without real charges.
+- **Time is passed in as a parameter.** `Showtime.isOnSale(now)` and `TicketHold.isExpired(now)` take the current time as an argument, so tests can check the 14-day, 10-minute, and 5-minute boundaries exactly, without waiting.
+- **Showtime is the single owner of seat status (4.4.4).** Because every hold and sale goes through one class and one connector (K2), the double-sale risk can be tested in one place at every level (TS-U1, TS-I1, TS-S1).
+- **AuditRecord is write-once (4.4.11).** Tests can confirm that an audit entry exists and cannot be changed afterward.
+
+Two changes were made while writing the test vectors:
+
+1. **Clarified sales-window boundary.** The description of `Showtime.isOnSale` in 4.4.4 now states that sales open *exactly* 14 days before the start time and close *at* 10 minutes after it (so a request at 7:09:59 PM for a 7:00 PM showing is accepted and one at 7:10:00 PM is refused). The old wording, "until 10 minutes after," did not say which side of the boundary was included, and a test needs a single correct answer.
+2. **Added Figure 4.** Section 5.3 adds a test-scope view of the architecture. It is a copy of Figure 2 marked with the test sets that cover each component and connector; it does not change the design.
+
 
 # 5. Test Plan
 
