@@ -1,7 +1,7 @@
 # Chinese Multi-Cinema (CMC) Ticketing System
 
 **Software Requirements Specification**  
-Version 2.0 · 8 October 2026
+Version 3.0 · 22 October 2026
 
 **Group #14:** Luke F., Matthew W., Joshua H.
 
@@ -18,6 +18,7 @@ Instructor: Gus Hanna, Ph.D. · Fall 2026
 | 17 Sep 2026 | Version 0.2 - Requirements draft            | Joshua H., Luke F., Matthew W. | Drafted Sections 1.1-3.1 and 3.5.                                                                                               |
 | 24 Sep 2026 | Version 1.0 - Complete SRS (Sections 1-3.5) | Joshua H., Luke F., Matthew W. | Completed Sections 1-3.5: functional requirements, use-case diagram and descriptions, classes, and non-functional requirements. |
 | 8 Oct 2026 | Version 2.0 - Software Design Specification | Joshua H., Luke F., Matthew W. | Added Section 4: system description, software architecture, UML class diagram, class descriptions, and development plan. |
+| 22 Oct 2026 | Version 3.0 - Test Plan | Joshua H., Luke F., Matthew W. | Added Section 4.6 (design updates) and Section 5: test strategy, test-scope diagram, unit, integration, functional, and system test sets, ten sample test cases, traceability, and test schedule. |
 
 # Document Approval
 
@@ -112,12 +113,20 @@ The following Software Requirements Specification has been accepted and approved
     - [4.5.1 Partitioning of Tasks](#451-partitioning-of-tasks)
     - [4.5.2 Team Member Responsibilities](#452-team-member-responsibilities)
   - [4.6 Design Updates Since Version 2.0](#46-design-updates-since-version-20)
+- [5. Test Plan](#5-test-plan)
+  - [5.1 Test Objectives](#51-test-objectives)
+  - [5.2 Test Strategy](#52-test-strategy)
+    - [5.2.1 Test Levels](#521-test-levels)
+    - [5.2.2 Test Design Techniques](#522-test-design-techniques)
+    - [5.2.3 Test Environment and Test Data](#523-test-environment-and-test-data)
+    - [5.2.4 Entry and Exit Criteria](#524-entry-and-exit-criteria)
+  - [5.3 Test Scope on the Design](#53-test-scope-on-the-design)
 
 # 1. Introduction
 
 Chinese Multi-Cinema (CMC) operates 20 movie theaters in the San Diego area. Its current ticketing software handles basic sales, but years of patches have made it slow and unreliable, and customers have no convenient way to buy tickets ahead of time. CMC needs a single, modern ticketing system shared by every theater, kiosk, and box office, so that customers can buy tickets in a few minutes from anywhere and every employee sees the same showtimes, prices, and seat availability.
 
-The new CMC Ticketing System will let customers browse movies and showtimes, buy up to 20 tickets at a time, choose their seats in deluxe auditoriums, and receive tickets by email or as a printout, either as a guest or with an optional account that tracks loyalty points and membership. Theater employees will use the same system to sell, scan, and refund tickets, administrators will use it to manage movies, showtimes, and prices, and CMC management will use it to review sales across all locations. Sections 1-3 describe what the system must do and how well it must do it; Section 4 describes how it will be built.
+The new CMC Ticketing System will let customers browse movies and showtimes, buy up to 20 tickets at a time, choose their seats in deluxe auditoriums, and receive tickets by email or as a printout, either as a guest or with an optional account that tracks loyalty points and membership. Theater employees will use the same system to sell, scan, and refund tickets, administrators will use it to manage movies, showtimes, and prices, and CMC management will use it to review sales across all locations. Sections 1-3 describe what the system must do and how well it must do it; Section 4 describes how it will be built; and Section 5 describes how it will be tested.
 
 ## 1.1 Purpose
 
@@ -187,9 +196,13 @@ The software product specified here is the **CMC Ticketing System**, a browser-b
 
 - Software Engineering Tutorial (course reading), CS 250 - Introduction to Software Systems, Fall 2026.
 
+- Atlassian. *How to Write a Test Plan*. Available from atlassian.com/software/confluence/resources/guides/how-to/test-plan.
+
+- GeeksforGeeks. *Test Plan - Software Testing*. Available from geeksforgeeks.org/software-testing/test-plan-software-testing/.
+
 ## 1.5 Overview
 
-The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5). **Section 4 - Software Design Specification** describes how the system would be built: a system description (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5).
+The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5). **Section 4 - Software Design Specification** describes how the system would be built: a system description (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5). **Section 5 - Test Plan** describes how the system will be verified and validated: the test strategy (5.1-5.2), the test scope drawn on the architecture (5.3), the unit, integration, functional, and system test sets (5.4-5.7), the sample test cases (5.8), requirements traceability (5.9), and the test schedule (5.10).
 
 # 2. General Description
 
@@ -1158,18 +1171,105 @@ Two changes were made while writing the test vectors:
 
 # 5. Test Plan
 
-## 5.1 Purpose, Scope, and Test Strategy
+This section explains how the CMC Ticketing System will be tested. It covers both kinds of checking described in the course reading:
 
-The plan structure follows the scope, responsibilities, success criteria and risk topics in [Atlassian's test-plan guide](https://www.atlassian.com/software/confluence/resources/guides/how-to/test-plan#how-to). Entry/exit gates, environment planning and suspension rules also reflect the supplied [GeeksforGeeks test-plan article](https://www.geeksforgeeks.org/software-testing/test-plan-software-testing/). All CMC inputs and expected results below are derived from this SRS or explicitly identified as proposed test conventions.
+- **Verification** - are we building the product right? Each class, module, and connector is checked against the design in Section 4.
+- **Validation** - are we building the right product? The finished system is checked against the user requirements in Section 2.2 and the measurable requirements in Section 3.5.
 
-## 5.2 Design Review and UML Test Scope
+Every test set below names the design elements it targets (Section 4), the requirements it checks (Section 3), and the failures it is meant to catch, so a failed test points both to the broken requirement and to the place in the design to look.
 
-## 5.3 Environment, Fixtures, and Test Oracles
+**GitHub repository:** The test plan, this SRS, and the test case workbook are stored in the group repository at **(https://github.com/7mwang/CMC-Ticketing)** (folder `test-plan/`).
 
-## 5.4 Test Sets and Requirement Coverage
+## 5.1 Test Objectives
 
-## 5.5 Ten Detailed Test Case Samples
+The test plan has five objectives:
 
-## 5.6 Additional Feature and Quality Coverage
+1. Show that each class in Section 4.4 behaves as its operation descriptions state, including exactly at the edges of CMC's business rules: the 14-day sales window, the 10-minute sales close, the 5-minute hold, and the 20-ticket limit.
+2. Show that the modules work together across connectors K2-K5, including when an external service declines, fails, or does not answer.
+3. Show that every Must-have functional requirement works through its use case, the way a customer or employee would use it.
+4. Measure the system against the non-functional requirements in Section 3.5 (performance, reliability, availability, security, and usability) on a production-like installation.
+5. Show that the two failures CMC cares about most cannot happen: **an assigned seat sold to two customers** (FR-12, NFR-R-02) and **a customer charged twice or given tickets without paying** (FR-18, NFR-R-01).
 
-## 5.7 Entry, Exit, Suspension, and Reporting Criteria
+## 5.2 Test Strategy
+
+### 5.2.1 Test Levels
+
+Testing runs at four levels, from the smallest piece of code to the complete system. The plan covers the three standard granularities (unit, functional, and system) with at least two test sets each, and adds an integration level between unit and functional because the highest-risk behavior (holding seats and taking payment) happens where modules connect.
+
+**Table 5-1.** *Test levels*
+
+| Level | What is tested | Approach | Run by | When (Section 4.5 task) | Test sets |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| **Unit** | One class and its operations, with every other class replaced by a simple stand-in (stub) | White-box: branch coverage and boundary values | The developer who wrote the class | Tasks 2-5, as each class is written | TS-U1, TS-U2, TS-U3 |
+| **Integration** | Two or more classes or modules working through a connector, using a real test database and stubbed external services | Interface testing: data passed between components, error returns, and saved data | The module leads | Tasks 3-5, after the classes pass their unit tests | TS-I1, TS-I2 |
+| **Functional** | One feature (use case) at a time, driven through the website, kiosk, or employee screens | Black-box: equivalence classes, boundary values, decision tables, and use-case scenarios | Test lead (Luke F.) with one other member | Task 7 | TS-F1, TS-F2, TS-F3 |
+| **System** | The complete installed system, all three channels at once, measured against Section 3.5 | Black-box: load, stress, concurrency, security, failover, and usability testing | All members | Tasks 7-8 | TS-S1, TS-S2, TS-S3, TS-S4 |
+
+**Regression testing.** All automated unit, integration, and functional tests are re-run after every change merged into the repository, so a fix in one module cannot silently break another. The Reports module (FR-41 to FR-43) is a read-only module with low risk and is covered only by this regression suite in the first release.
+
+### 5.2.2 Test Design Techniques
+
+The test vectors in Sections 5.4-5.7 were chosen with the following techniques from the course reading, so that a small number of tests covers each feature thoroughly:
+
+- **Equivalence classes.** Inputs are split into groups that the system should treat the same way, and one value is tested from each group. For example, ticket quantity has three classes: 0 or fewer (invalid), 1-20 (valid), and 21 or more (invalid).
+- **Boundary values.** Most defects occur at limits, so each limit is tested on the boundary and just on each side of it: 20 and 21 tickets; a hold at 4:59, 5:00, and 5:01; sales opening exactly 14 days before the show and closing exactly 10 minutes after it starts.
+- **State-based testing.** Tickets, seats, and showtimes move between fixed states (for example, a seat is AVAILABLE, HELD, or SOLD). Every allowed change and every forbidden change is tested once (TS-U2).
+- **Decision tables (cause and effect).** When an outcome depends on a combination of conditions, every combination is listed as a rule and tested. Refund eligibility uses this technique (TS-F2).
+- **Control-flow (branch) coverage.** Unit tests run every branch of the targeted operations in both directions (true and false) at least once.
+
+### 5.2.3 Test Environment and Test Data
+
+- **Environment.** A test installation that matches production: one server, one database, and the three client types: the four supported browsers (current and previous versions, NFR-PT-01), a touchscreen kiosk, and an employee workstation with a ticket printer and scanner.
+- **Test clock.** The server's clock can be set by the tester, so time-based rules can be tested in seconds instead of days.
+- **Stand-ins for external services.** The payment service is replaced by *FakePaymentGateway* (an implementation of the PaymentGateway interface) in unit and integration tests, and by the payment processor's own sandbox in functional and system tests. The email and review services use a sandbox and a stub, and can be switched off to test the "service unavailable" flows.
+- **Test data.** Two theaters. Theater 1 has Auditorium 1 (regular, 150 general-admission seats) and Auditorium 2 (deluxe, 75 seats in rows A-E, numbered 1-15). Two showtimes of a 120-minute test movie start at **7:00 PM on Friday, 20 November 2026**: **SHOW-REG** in Auditorium 1 and **SHOW-DLX** in Auditorium 2. Test prices are ADULT $15.00 and CHILD, STUDENT, SENIOR, and MILITARY $11.00, with a $1.00 fee per ticket on the website and kiosk. Test accounts exist for each role: E100 (BOX_OFFICE), E200 (ADMINISTRATOR), and E300 (MANAGER), plus one customer account.
+- **Tools.** An automated unit-testing framework and code-coverage tool for the language chosen in Task 1 (coverage target of 80%, NFR-M-03); a load-testing tool such as Apache JMeter for TS-S1 and TS-S2; an automated accessibility checker for TS-S4; and GitHub Issues in the group repository for tracking defects.
+
+### 5.2.4 Entry and Exit Criteria
+
+**Entry criteria.** A test level starts only when the level below it has passed: integration tests run on classes that pass their unit tests, functional tests run on modules that pass integration, and system tests run on the fully integrated build. The requirements (SRS Version 2.0) are baselined, so tests are written against fixed requirement IDs.
+
+**Defect severity.**
+
+| Severity | Meaning | Example |
+| :---- | :---- | :---- |
+| **Critical** | Money, seats, or data are wrong, or security is broken | A seat is sold twice; a card is charged twice |
+| **High** | A Must-have feature does not work and has no workaround | A valid ticket is rejected at the door |
+| **Medium** | A feature works incorrectly but has a workaround | The refund confirmation does not print but can be emailed |
+| **Low** | Cosmetic issue | A misaligned label on the seat map |
+
+**Exit criteria.** Testing is complete and the system can be deployed (Task 8) when:
+
+- every P0 test case passes;
+- no Critical or High defects are open;
+- automated tests cover at least 80% of the server code;
+- every Must-have requirement is covered by at least one passing test (Table 5-7); and
+- every measurable requirement in Section 3.5 is met in TS-S1 to TS-S4.
+
+## 5.3 Test Scope on the Design
+
+Figure 4 places the test plan on the software architecture from Figure 2. Each component and connector is marked with the test sets that cover it. Unit tests (blue) target classes inside the server modules; integration tests (purple) target the connectors between modules, the database, and the payment service; functional tests (green) enter through the three client applications; and system tests (orange) cover everything inside the dashed orange boundary. The external services sit outside the boundary because CMC does not own them: we test how our system handles their answers, not the services themselves. The Ticket Purchase module is outlined in red because the two most serious failures in Section 5.1 would happen there.
+
+![Figure 4. Test scope of the CMC Ticketing System](images/figure4-test-scope.png)
+
+*Figure 4. Test scope of the CMC Ticketing System, drawn on the architecture of Figure 2*
+
+Table 5-2 lists the failures each part of the design is tested against.
+
+**Table 5-2.** *Design elements, test sets, and failures covered*
+
+| Design element (Section 4) | Test sets | Failures the tests are designed to catch |
+| :---- | :---- | :---- |
+| **Showtime** (4.4.4) | TS-U1, TS-I1, TS-S1 | Sales open or close one minute early or late; a held or sold seat can be held again; a partial hold leaves seats stuck in HELD |
+| **TicketHold** (4.4.5) | TS-U3, TS-F1 | A hold expires early or never expires; more than 20 tickets are accepted; the number of seats does not match the number of tickets |
+| **Ticket** (4.4.6) | TS-U2, TS-F2 | A ticket admits two people; a refunded ticket or a ticket for another showtime is admitted; validation codes repeat |
+| **Transaction + PaymentGateway** (4.4.7, 4.4.12, K3) | TS-I1, TS-F1, TS-S1 | Tickets issued without approved payment; a double submission charges twice; an approved payment is not saved |
+| **Box Office module + AuditRecord** (4.4.11) | TS-I2, TS-F2 | A refund after the show starts; a rejected refund still cancels the ticket; a refund without an audit entry |
+| **Administration module** | TS-I2, TS-F3 | Overlapping showtimes; negative or missing prices; a change that does not reach the other channels |
+| **Account, EmployeeAccount** (4.4.8-4.4.10) | TS-F1, TS-S3 | An employee function reachable without the right role; unlimited password guessing; two active sessions |
+| **Data Access Layer + Central Database** (K2) | TS-I1, TS-I2, TS-S1 | Two simultaneous requests both succeed in buying one seat; saved data does not match the objects |
+| **K1 (HTTPS)** | TS-S2, TS-S3 | Slow responses under load; unencrypted or outdated-TLS connections accepted |
+| **K4 and K5 (email, reviews)** | TS-F1, TS-S2 | An email or review service outage stops browsing or purchasing |
+| **Client applications** | TS-F1 to TS-F3, TS-S4 | Purchase flow too slow or confusing; kiosk keeps personal data; pages fail accessibility checks |
+
+**Not tested in this release.** Features outside the scope in Section 1.2 (a native mobile app, online self-service refunds, concessions) are not tested. Could-have requirements (FR-17 Bitcoin, FR-28 membership purchase, FR-43 CSV export, FR-44 satisfaction rating) will receive test cases only if they are implemented. The external payment, email, and review services are not tested themselves.
