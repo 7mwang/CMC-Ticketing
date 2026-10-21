@@ -202,7 +202,7 @@ The software product specified here is the **CMC Ticketing System**, a browser-b
 
 ## 1.5 Overview
 
-The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5). **Section 4 - Software Design Specification** describes how the system would be built: a system description (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5). **Section 5 - Test Plan** describes how the system will be verified and validated: the test strategy (5.1-5.2), the test scope drawn on the architecture (5.3), the unit, integration, functional, and system test sets (5.4-5.7), the sample test cases (5.8), requirements traceability (5.9), and the test schedule (5.10).
+The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5). **Section 4 - Software Design Specification** describes how the system would be built: a system description (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5), and the design updates made in this version (4.6). **Section 5 - Test Plan** describes how the system will be verified and validated: the test strategy (5.1-5.2), the test scope drawn on the architecture (5.3), the unit, integration, functional, and system test sets (5.4-5.7), the sample test cases (5.8), requirements traceability (5.9), and the test schedule (5.10).
 
 # 2. General Description
 
@@ -1178,7 +1178,7 @@ This section explains how the CMC Ticketing System will be tested. It covers bot
 
 Every test set below names the design elements it targets (Section 4), the requirements it checks (Section 3), and the failures it is meant to catch, so a failed test points both to the broken requirement and to the place in the design to look.
 
-**GitHub repository:** The test plan, this SRS, and the test case workbook are stored in the group repository at **(https://github.com/7mwang/CMC-Ticketing)** (folder `test-plan/`).
+**GitHub repository:** The test plan, this SRS, and the test case workbook are stored in the group repository at **https://github.com/7mwang/CMC-Ticketing** (folder `test-plan/`).
 
 ## 5.1 Test Objectives
 
