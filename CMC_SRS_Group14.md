@@ -121,6 +121,25 @@ The following Software Requirements Specification has been accepted and approved
     - [5.2.3 Test Environment and Test Data](#523-test-environment-and-test-data)
     - [5.2.4 Entry and Exit Criteria](#524-entry-and-exit-criteria)
   - [5.3 Test Scope on the Design](#53-test-scope-on-the-design)
+  - [5.4 Unit Test Sets](#54-unit-test-sets)
+    - [5.4.1 TS-U1: Showtime Sales Window and Seat Status](#541-ts-u1-showtime-sales-window-and-seat-status)
+    - [5.4.2 TS-U2: Ticket Validation and Refund States](#542-ts-u2-ticket-validation-and-refund-states)
+    - [5.4.3 TS-U3: TicketHold Expiry and Ticket Limits](#543-ts-u3-tickethold-expiry-and-ticket-limits)
+  - [5.5 Integration Test Sets](#55-integration-test-sets)
+    - [5.5.1 TS-I1: Purchase Pipeline](#551-ts-i1-purchase-pipeline)
+    - [5.5.2 TS-I2: Refund and Audit Path](#552-ts-i2-refund-and-audit-path)
+  - [5.6 Functional Test Sets](#56-functional-test-sets)
+    - [5.6.1 TS-F1: Purchase Tickets (UC-01, UC-02, UC-03)](#561-ts-f1-purchase-tickets-uc-01-uc-02-uc-03)
+    - [5.6.2 TS-F2: Validate Tickets and Process Refunds (UC-07, UC-08)](#562-ts-f2-validate-tickets-and-process-refunds-uc-07-uc-08)
+    - [5.6.3 TS-F3: Manage Showtimes and Prices (UC-09)](#563-ts-f3-manage-showtimes-and-prices-uc-09)
+  - [5.7 System Test Sets](#57-system-test-sets)
+    - [5.7.1 TS-S1: Seat Integrity and Cross-Channel Consistency](#571-ts-s1-seat-integrity-and-cross-channel-consistency)
+    - [5.7.2 TS-S2: Performance, Load, and Availability](#572-ts-s2-performance-load-and-availability)
+    - [5.7.3 TS-S3: Security](#573-ts-s3-security)
+    - [5.7.4 TS-S4: Usability and Accessibility (Acceptance)](#574-ts-s4-usability-and-accessibility-acceptance)
+  - [5.8 Test Case Samples](#58-test-case-samples)
+  - [5.9 Requirements Traceability](#59-requirements-traceability)
+  - [5.10 Test Schedule and Responsibilities](#510-test-schedule-and-responsibilities)
 
 # 1. Introduction
 
@@ -1272,4 +1291,285 @@ Table 5-2 lists the failures each part of the design is tested against.
 | **K4 and K5 (email, reviews)** | TS-F1, TS-S2 | An email or review service outage stops browsing or purchasing |
 | **Client applications** | TS-F1 to TS-F3, TS-S4 | Purchase flow too slow or confusing; kiosk keeps personal data; pages fail accessibility checks |
 
-**Not tested in this release.** Features outside the scope in Section 1.2 (a native mobile app, online self-service refunds, concessions) are not tested. Could-have requirements (FR-17 Bitcoin, FR-28 membership purchase, FR-43 CSV export, FR-44 satisfaction rating) will receive test cases only if they are implemented. The external payment, email, and review services are not tested themselves.
+**Not tested in this release.** Features outside the scope in Section 1.2 (a native mobile app, online self-service refunds, concessions) are not tested. Could-have requirements (FR-17 Bitcoin, FR-28 membership purchase, FR-43 CSV export, FR-44 satisfaction rating). 
+
+## 5.4 Unit Test Sets
+
+Each unit test set exercises one class in isolation. Classes that the target class depends on are replaced by stubs, and the test clock supplies the current time.
+
+### 5.4.1 TS-U1: Showtime Sales Window and Seat Status
+
+**Target.** The Showtime class (4.4.4): `isOnSale(now)`, `holdSeats(seats)`, `releaseSeats(seats)`, and `getSeatsRemaining()`.
+
+**Requirements.** FR-02, FR-04, FR-05, FR-12, FR-13.
+
+**Why this class.** Every channel holds and sells seats through Showtime, so a defect here becomes a defect on the website, the kiosk, and the box office at the same time.
+
+**Method.** Boundary values for the sales window; state-based tests for seat status; 100% branch coverage of the four operations.
+
+**Table 5-3.** *TS-U1 test vectors (SHOW-DLX starts 20 Nov 2026, 7:00 PM)*
+
+| Vector | Input | Expected result |
+| :---- | :---- | :---- |
+| U1-1 | `isOnSale(6 Nov, 6:59 PM)` - 1 minute before sales open | false |
+| U1-2 | `isOnSale(6 Nov, 7:00 PM)` - exactly 14 days before | true |
+| U1-3 | `isOnSale(20 Nov, 7:09:59 PM)` - just before sales close | true |
+| U1-4 | `isOnSale(20 Nov, 7:10:00 PM)` - exactly 10 minutes after start | false |
+| U1-5 | `isOnSale(15 Nov, noon)` with status CANCELLED | false |
+| U1-6 | `holdSeats(["C7", "C8"])`, both AVAILABLE | true; C7 and C8 become HELD |
+| U1-7 | `holdSeats(["C8", "C9"])` after U1-6 (C8 already HELD) | false; C9 stays AVAILABLE (the hold is all-or-nothing) |
+| U1-8 | `holdSeats(["Z99"])` - a seat that does not exist | false; no seat changes |
+| U1-9 | `releaseSeats(["C7", "C8"])`, then `getSeatsRemaining()` | C7 and C8 AVAILABLE; 75 |
+
+**Pass criteria.** All nine vectors give the expected result and every branch of the four operations is executed.
+
+### 5.4.2 TS-U2: Ticket Validation and Refund States
+
+**Target.** The Ticket class (4.4.6): `validate(showtimeID)` and `refund()`.
+
+**Requirements.** FR-20, FR-31, FR-32, FR-33, NFR-S-06.
+
+**Method.** State-based testing. A ticket can be ISSUED, REDEEMED, or REFUNDED. Table 5-4 lists every combination of starting state and action; each cell is one test vector, so the set tests every allowed and every forbidden change of state.
+
+**Table 5-4.** *TS-U2 state transition vectors*
+
+| Starting state | `validate()` for the correct showtime | `validate()` for a different showtime | `refund()` |
+| :---- | :---- | :---- | :---- |
+| **ISSUED** | true; becomes REDEEMED | false ("wrong showtime"); stays ISSUED | becomes REFUNDED; seat returned to Showtime |
+| **REDEEMED** | false ("already used"); stays REDEEMED | false; stays REDEEMED | refused; stays REDEEMED |
+| **REFUNDED** | false ("refunded"); stays REFUNDED | false; stays REFUNDED | refused; stays REFUNDED |
+
+A tenth vector generates 100,000 tickets and checks that no two validation codes are the same and that each code carries at least 128 random bits (NFR-S-06).
+
+**Pass criteria.** All ten vectors give the expected result.
+
+### 5.4.3 TS-U3: TicketHold Expiry and Ticket Limits
+
+**Target.** The TicketHold class (4.4.5): creating a hold, `isExpired(now)`, and `release()`.
+
+**Requirements.** FR-08, FR-09, FR-11, FR-13.
+
+**Method.** Equivalence classes and boundary values for quantity; boundary values for expiry time.
+
+**Table 5-5.** *TS-U3 test vectors (hold created at 7:00:00 PM, so expiresAt = 7:05:00 PM)*
+
+| Vector | Input | Expected result |
+| :---- | :---- | :---- |
+| U3-1 | `isExpired(7:04:59 PM)` | false |
+| U3-2 | `isExpired(7:05:00 PM)` | false (the hold expires *after* expiresAt) |
+| U3-3 | `isExpired(7:05:01 PM)` | true |
+| U3-4 | Create a hold with 0 tickets | rejected |
+| U3-5 | Create a hold with 1 ticket | accepted |
+| U3-6 | Create a hold with 20 tickets | accepted |
+| U3-7 | Create a hold with 21 tickets | rejected (FR-08) |
+| U3-8 | Deluxe hold with 3 tickets but only 2 seats | rejected (one seat per ticket, FR-09) |
+| U3-9 | `release()` called twice on the same hold | seats AVAILABLE after the first call; the second call changes nothing |
+
+**Pass criteria.** All nine vectors give the expected result.
+
+## 5.5 Integration Test Sets
+
+Integration tests combine classes that already passed their unit tests (bottom-up integration). They use a real test database through the Data Access Layer (K2) and FakePaymentGateway for the payment service (K3), and they check what is actually saved in the database, not only what an operation returns.
+
+### 5.5.1 TS-I1: Purchase Pipeline
+
+**Target.** Ticket Purchase module: TicketHold, Showtime, Transaction (`processPayment`, `issueTickets`), and PaymentGateway, across K2 and K3.
+
+**Requirements.** FR-11, FR-13, FR-18, FR-19, FR-20, NFR-R-01, NFR-R-03.
+
+**Failures covered.** Tickets issued without approved payment; a double charge; an approved payment that is not saved; held seats that are never released.
+
+| Vector | Setup and action | Expected result |
+| :---- | :---- | :---- |
+| I1-1 | Hold D7 and D8 (2 ADULT, total $32.00); gateway set to APPROVE; submit payment | One APPROVED PURCHASE transaction with a confirmation number; two ISSUED tickets with different codes; D7 and D8 saved as SOLD |
+| I1-2 | Same as I1-1, but the order is submitted twice within one second | The gateway receives exactly one charge; exactly one transaction is saved |
+| I1-3 | Gateway set to DECLINE | No tickets issued; D7 and D8 stay HELD until the hold expires |
+| I1-4 | Gateway set to TIMEOUT (no answer) | No tickets issued; the hold stays active; the customer is told the payment status is being checked |
+| I1-5 | No payment; test clock moved to 5 minutes 1 second after the hold | D7 and D8 saved as AVAILABLE within 10 seconds |
+
+### 5.5.2 TS-I2: Refund and Audit Path
+
+**Target.** Box Office module, Ticket (`refund`), PaymentGateway (`refund`), Showtime (`releaseSeats`), and AuditRecord, across K2 and K3.
+
+**Requirements.** FR-33, FR-39, NFR-S-04, and the error handling in 3.2.5.5.
+
+**Failures covered.** A rejected refund that still cancels the ticket; a refund without an audit entry; a refund by an employee without permission.
+
+| Vector | Setup and action | Expected result |
+| :---- | :---- | :---- |
+| I2-1 | E100 refunds D7 of a two-ticket purchase before the show, reason "schedule conflict"; gateway APPROVES | D7 REFUNDED and AVAILABLE; D8 unchanged; one REFUND transaction; one AuditRecord with E100, action, reason, and timestamp |
+| I2-2 | Same, but the gateway REJECTS the refund | D7 stays ISSUED and SOLD; no REFUND transaction; the rejection reason is returned to the screen |
+| I2-3 | Same as I2-1 with an empty reason | Refused before the gateway is called |
+| I2-4 | E300 (MANAGER role, no refund permission) attempts I2-1 | `hasPermission` returns false; refused; the attempt is logged |
+| I2-5 | After I2-1, an attempt is made to edit the AuditRecord | Refused; the record is unchanged |
+
+## 5.6 Functional Test Sets
+
+Functional tests treat the system as a black box. A tester follows each use case from Section 3.3 through the real screens, using the processor's payment sandbox, and compares what happens with the use case's main scenario and its alternate flows.
+
+### 5.6.1 TS-F1: Purchase Tickets (UC-01, UC-02, UC-03)
+
+**Target.** Customer Website and Lobby Kiosk, through the Browsing, Ticket Purchase, and Accounts modules and the email and review services (K4, K5).
+
+**Requirements.** FR-01 to FR-22, FR-45, UI-01 to UI-03, UI-05; user requirements UR-01 to UR-05.
+
+| Vector | Scenario | Expected result |
+| :---- | :---- | :---- |
+| F1-1 | Guest on the website buys 2 ADULT for SHOW-DLX, seats D7 and D8, with an approved sandbox card (main scenario of UC-02 and UC-03) | Hold countdown shown; total $32.00 shown before payment; confirmation number displayed; tickets emailed within 2 minutes; D7 and D8 shown as sold on the kiosk |
+| F1-2 | Kiosk customer buys 2 ADULT and 2 CHILD for SHOW-REG | No seat map; total $56.00; finished in six screens or fewer; tickets print |
+| F1-3 | Customer selects 21 tickets, then 20 (UC-02 flow 2a) | 21 is blocked with an explanation of the limit; 20 continues to checkout |
+| F1-4 | Two testers choose seat D9 at the same moment (UC-03 flow 3a) | One gets the seat; the other is told it is taken and asked to choose another |
+| F1-5 | Sandbox card declined, then PayPal used within the hold (flow 7a) | No tickets after the decline; the PayPal payment succeeds and tickets are issued once |
+| F1-6 | Customer waits more than 5 minutes on the payment page (flow 7b) | Hold-expired message; the seats are available again; the customer can restart |
+| F1-7 | Email and review services switched off (flows 9a and UC-01 4a) | Showtimes appear without scores; purchase completes; tickets can be printed from the confirmation screen |
+| F1-8 | Customer opens a showtime 15 days away (UC-01 flow 5a) | No buy button; the date when sales open is shown |
+
+### 5.6.2 TS-F2: Validate Tickets and Process Refunds (UC-07, UC-08)
+
+**Target.** Employee Workstation, Box Office module, scanner and printer.
+
+**Requirements.** FR-30 to FR-33, FR-39; UR-09, UR-10.
+
+**Ticket validation vectors.** A tester scans (1) a newly issued ticket for the correct showtime, (2) the same ticket again, (3) a refunded ticket, (4) a ticket for a different showtime, and (5) types a random code. The expected results are "valid" with the auditorium and seat, then "already used," "refunded," "wrong showtime," and "not found." The tester also looks up one purchase by confirmation number, by ticket code, and by email address, and each search must find it (FR-30).
+
+**Refund vectors.** Whether a refund is allowed depends on three conditions, so all combinations are listed in a decision table, following the method in the course reading. Each rule is one test vector.
+
+**Table 5-6.** *Refund decision table*
+
+| | R1 | R2 | R3 | R4 | R5 |
+| :---- | :----: | :----: | :----: | :----: | :----: |
+| **Conditions** | | | | | |
+| Showtime has started | N | N | N | N | Y |
+| Ticket status | ISSUED | ISSUED | REDEEMED | REFUNDED | any |
+| Payment service approves the refund | Y | N | - | - | - |
+| **Actions** | | | | | |
+| Refund money and invalidate ticket | X | | | | |
+| Return seat to inventory and write audit record | X | | | | |
+| Refuse and show the reason | | X | X | X | X |
+| Ticket stays valid | | X | | | |
+
+### 5.6.3 TS-F3: Manage Showtimes and Prices (UC-09)
+
+**Target.** Employee Workstation (administrator screens) and the Administration module.
+
+**Requirements.** FR-34 to FR-37, FR-39, FR-40, NFR-P-04, NFR-S-04. A showtime is treated as occupying its auditorium from its start time until start time plus the movie's runtime.
+
+| Vector | Action (administrator E200 unless noted) | Expected result |
+| :---- | :---- | :---- |
+| F3-1 | Add a showtime in Auditorium 2 at 8:30 PM on 20 Nov (SHOW-DLX runs 7:00-9:00 PM) | Rejected as overlapping, with an explanation |
+| F3-2 | Add the same showtime at 9:00 PM | Accepted (boundary: starts exactly when the previous one ends) |
+| F3-3 | Add a 7:00 PM showtime in Auditorium 1 of Theater 2 | Accepted (different auditorium) |
+| F3-4 | Set the ADULT price to -$1.00, then leave it blank, then $0.00 | The first two are rejected; $0.00 is accepted (only negative or missing prices are invalid) |
+| F3-5 | Change the ADULT price from $15.00 to $16.00 | The new price appears on the kiosk within 2 seconds; an audit record is created |
+| F3-6 | Cancel a showtime that has 5 sold tickets | All 5 tickets are marked refund-eligible and listed for follow-up (FR-40) |
+| F3-7 | E100 (BOX_OFFICE) opens the administration page | Access denied; the attempt is logged |
+
+## 5.7 System Test Sets
+
+System tests run on the complete installation with all three channels active at once. Most of them measure the non-functional requirements in Section 3.5, which can only be checked on the whole system. TS-S4 is the validation step: real users confirm that the system meets their needs.
+
+### 5.7.1 TS-S1: Seat Integrity and Cross-Channel Consistency
+
+**Target.** The whole purchase path, especially the Data Access Layer, the database, and K2.
+
+**Requirements.** FR-10, FR-12, SI-03, NFR-R-02, NFR-P-04.
+
+- **S1-1 (deluxe seat race).** The load tool sends 500 simultaneous requests for seat E10, split across the website, kiosks, and box office. *Expected:* exactly one request gets the hold, 499 are told the seat is unavailable, and exactly one ticket for E10 exists after payment. The test is repeated 10 times.
+- **S1-2 (regular auditorium capacity).** 160 customers each try to buy one ticket for SHOW-REG (150 seats) at the same time. *Expected:* exactly 150 tickets are sold; the auditorium is never oversold.
+- **S1-3 (cross-channel update).** 100 purchases are made at the box office while a second tester watches the website and kiosk. *Expected:* each sold seat appears as sold on the other channels within 2 seconds in all 100 trials.
+
+### 5.7.2 TS-S2: Performance, Load, and Availability
+
+**Target.** The whole system, especially K1 and the database.
+
+**Requirements.** FR-45, NFR-P-01 to NFR-P-05, NFR-R-05, NFR-A-04, NFR-A-05.
+
+- **S2-1 (normal load).** 1,000 simulated users for one hour: 70% browsing, 25% buying, and 5% employee scanning and selling. *Expected:* 95% of browse pages load within 2 seconds, 95% of checkout steps finish within 3 seconds (not counting the payment service), and 99% of ticket scans finish within 1 second.
+- **S2-2 (stress).** The load is raised to 2,000 users. *Expected:* the waiting queue starts and shows each customer's position; the system does not crash; no completed purchase is lost.
+- **S2-3 (server failure).** One server is stopped during S2-1. *Expected:* sales resume within 5 minutes and no confirmed purchase or refund is lost.
+- **S2-4 (external outage).** The email and review services are switched off during S2-1. *Expected:* browsing, purchasing, and ticket validation continue normally.
+
+### 5.7.3 TS-S3: Security
+
+**Target.** Accounts module, employee and kiosk clients, K1, and the database.
+
+**Requirements.** FR-27, UI-06, CI-01, NFR-S-01 to NFR-S-05, NFR-S-07, NFR-S-08.
+
+- **S3-1 (account lockout).** Five wrong passwords on E100, then the correct one. *Expected:* the sixth attempt is refused for 15 minutes even though the password is correct; all six attempts are logged.
+- **S3-2 (role permissions).** Each role (BOX_OFFICE, ADMINISTRATOR, MANAGER, and a customer account) tries every employee function. *Expected:* only the functions allowed for that role succeed; denied attempts are logged.
+- **S3-3 (encryption).** Connections are attempted over plain HTTP and over TLS 1.0 and 1.1. *Expected:* all are refused or redirected to TLS 1.2 or higher.
+- **S3-4 (stored data).** After TS-F1, the tester searches the database for card numbers and plain-text passwords. *Expected:* none are found; passwords are stored only as salted hashes.
+- **S3-5 (kiosk privacy).** A customer leaves the kiosk in the middle of checkout. *Expected:* all personal and payment data is cleared after 60 seconds.
+- **S3-6 (bots).** A script makes 11 checkout attempts in one minute from one device and keeps going. *Expected:* a CAPTCHA appears, then the device is blocked.
+- **S3-7 (single session).** A customer signs in on a phone, then on a laptop. *Expected:* the phone session ends.
+
+### 5.7.4 TS-S4: Usability and Accessibility (Acceptance)
+
+**Target.** Customer Website and Lobby Kiosk.
+
+**Requirements.** UI-04, UI-05, NFR-U-01 to NFR-U-03; validates UR-01 to UR-05.
+
+- **S4-1 (alpha test).** 20 first-time participants of different ages, some of whom prefer Spanish, are asked to buy two tickets for a deluxe showing without help. *Expected:* at least 18 of 20 (90%) succeed without help, and the median time is 3 minutes or less.
+- **S4-2 (accessibility).** An automated checker and a manual keyboard and screen-reader review of the purchase flow. *Expected:* no WCAG 2.1 Level AA failures.
+- **S4-3 (kiosk and language).** Measure the kiosk's touch targets and count its screens; switch to Spanish on every page. *Expected:* targets of at least 1.5 cm × 1.5 cm; six screens or fewer; every page offers Spanish.
+- **S4-4 (beta test).** Before all 20 theaters go live in Task 8, the system runs at one theater for one week. CMC staff and customers report problems, which are fixed or scheduled before the full deployment.
+
+## 5.8 Test Case Samples
+
+Ten sample test cases are recorded in the course's Excel test case template, saved in the repository as `test-plan/CMC_TestCases_Group14.xlsx`. They cover all four levels (three unit, two integration, three functional, and two system cases), and each one is a fully specified version of a vector from the test sets above. Because the system has not been built yet, the *Actual Result* and *Status* columns are marked "Not run"; they will be filled in when the tests are executed in Task 7. The *Test Executed By* column names the member assigned to run each case.
+
+| ID | Level | Component | Summary | From vector |
+| :---- | :---- | :---- | :---- | :---- |
+| UT-01 | Unit | Showtime | Sales open exactly 14 days before and close 10 minutes after the start time | U1-1 to U1-4 |
+| UT-02 | Unit | Showtime | A seat hold is all-or-nothing and cannot take an already-held seat | U1-6 to U1-9 |
+| UT-03 | Unit | Ticket | A ticket is redeemed once; reused, wrong-showtime, and refunded tickets are rejected | Table 5-4 |
+| IT-01 | Integration | Ticket Purchase + DAL + PaymentGateway | An approved payment creates one transaction and SOLD seats; a double submission charges once | I1-1, I1-2 |
+| IT-02 | Integration | Box Office + PaymentGateway + AuditRecord | A rejected refund leaves the ticket valid; an approved refund frees the seat and is audited | I2-1, I2-2 |
+| FT-01 | Functional | Customer Website | A guest buys two deluxe tickets with seat selection | F1-1 |
+| FT-02 | Functional | Customer Website | 21 tickets are blocked and 20 are accepted | F1-3 |
+| FT-03 | Functional | Employee Workstation | Refunds are refused after the show starts and for a redeemed ticket | R3, R5 |
+| ST-01 | System | Whole system | 500 simultaneous requests for one seat produce exactly one sale | S1-1 |
+| ST-02 | System | Accounts / Employee Workstation | Five failed sign-ins lock an employee account for 15 minutes | S3-1 |
+
+## 5.9 Requirements Traceability
+
+Table 5-7 maps each group of requirements to the test sets that cover it. Every Must-have requirement is covered by at least one test set, and most are covered at more than one level.
+
+**Table 5-7.** *Traceability from requirements to test sets*
+
+| Requirements | Feature | Test sets |
+| :---- | :---- | :---- |
+| FR-01 to FR-06, UI-04 | Browse movies and showtimes | TS-U1, TS-F1, TS-S4 |
+| FR-07 to FR-14, UI-02, UI-03 | Select and hold tickets | TS-U1, TS-U3, TS-I1, TS-F1, TS-S1 |
+| FR-15 to FR-21, UI-01, SI-01, SI-04, CI-03 | Purchase and deliver tickets | TS-I1, TS-F1, TS-S2 |
+| FR-22 to FR-27 | Customer accounts | TS-F1, TS-S3 |
+| FR-29 to FR-33 | Box office sales, validation, refunds | TS-U2, TS-I2, TS-F2 |
+| FR-34 to FR-40 | Administration | TS-I2, TS-F3 |
+| FR-41, FR-42 | Reports | Regression suite |
+| FR-45, FR-46 | Demand protection | TS-S2, TS-S3 |
+| NFR-P-01 to NFR-P-05 | Performance | TS-S1, TS-S2 |
+| NFR-R-01 to NFR-R-03, NFR-R-05 | Reliability | TS-I1, TS-S1, TS-S2 |
+| NFR-A-04, NFR-A-05 | Availability | TS-S2 |
+| NFR-S-01 to NFR-S-08, CI-01, UI-06 | Security | TS-U2, TS-I2, TS-S3 |
+| NFR-M-03 | Test coverage | Exit criteria (5.2.4) |
+| NFR-U-01 to NFR-U-03, UI-05, NFR-PT-01, NFR-PT-03 | Usability, accessibility, portability | TS-S4 |
+
+Requirements that are checked by inspection or by operating procedures rather than by tests (NFR-R-04 backups, NFR-A-01 to NFR-A-03 monthly uptime and maintenance windows, NFR-M-01, NFR-M-02, NFR-M-04, NFR-PT-02, NFR-PT-04) are reviewed during Task 8 before deployment.
+
+## 5.10 Test Schedule and Responsibilities
+
+The test schedule follows the development plan in Section 4.5: unit tests are written alongside each module, integration tests follow as modules are finished, and functional and system testing take place in Tasks 7 and 8.
+
+| Test sets | Owner | Runs during | Target date |
+| :---- | :---- | :---- | :---- |
+| TS-U1 | Matthew W. | Task 2 (Browsing module) | 23 Oct 2026 |
+| TS-U2, TS-U3 | Luke F. | Task 3 (Ticket Purchase module) | 6 Nov 2026 |
+| TS-I1 | Luke F., with Joshua H. | Tasks 3-5, once the Ticket Purchase classes pass their unit tests | 13 Nov 2026 |
+| TS-I2 | Joshua H. | Task 5 (Box Office and Administration) | 20 Nov 2026 |
+| TS-F1 to TS-F3 | Luke F. (lead), Matthew W. | Task 7 (Testing) | 27 Nov 2026 |
+| TS-S1 to TS-S3 | All members | Task 7 (Testing) | 4 Dec 2026 |
+| TS-S4 | All members, with CMC staff | Task 8 (alpha and beta testing before full deployment) | 11 Dec 2026 |
+
+Defects found at any level are recorded as GitHub Issues with their severity, the failing test case ID, and the requirement ID. A defect is closed only after its test case passes again and the full regression suite still passes.
+
+**Documents produced.** Before testing: this test plan and the test case workbook. During testing: test logs and an updated *Actual Result* and *Status* for each case. After testing: a test summary report stating whether the exit criteria in 5.2.4 are met and the system is ready to deploy.
