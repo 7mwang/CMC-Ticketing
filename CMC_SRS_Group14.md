@@ -1570,4 +1570,4 @@ The test schedule follows the development plan in Section 4.5: unit tests are wr
 
 Defects found at any level are recorded as GitHub Issues with their severity, the failing test case ID, and the requirement ID. A defect is closed only after its test case passes again and the full regression suite still passes.
 
-**Documents produced.** Before testing: this test plan and the test case workbook. During testing: test logs and an updated *Actual Result* and *Status* for each case. After testing: a test summary report stating whether the exit criteria in 5.2.4 are met and the system is ready to deploy.
+The testing process will be fully logged including results and statuses for each case. After testing occurs, a summary will be created that details whether the exit criteria in 5.2.4 are met and the system is ready to deploy.
