@@ -1224,7 +1224,7 @@ Testing runs at four levels, from the smallest piece of code to the complete sys
 | **Functional** | One feature (use case) at a time, driven through the website, kiosk, or employee screens | Black-box: equivalence classes, boundary values, decision tables, and use-case scenarios | Test lead (Luke F.) with one other member | Task 7 | TS-F1, TS-F2, TS-F3 |
 | **System** | The complete installed system, all three channels at once, measured against Section 3.5 | Black-box: load, stress, concurrency, security, failover, and usability testing | All members | Tasks 7-8 | TS-S1, TS-S2, TS-S3, TS-S4 |
 
-**Regression testing.** All automated unit, integration, and functional tests are re-run after every change merged into the repository, so a fix in one module cannot silently break another. The Reports module (FR-41 to FR-43) is a read-only module with low risk and is covered only by this regression suite in the first release.
+**Regression testing.** All automated unit, integration, and functional tests are re-run after every change merged into the repository, so a fix in one module cannot silently break another. The Reports module (FR-41 to FR-43) is a read-only module with low risk and is covered only by this regression suite in the first release
 
 ### 5.2.2 Test Design Techniques
 
@@ -1242,11 +1242,11 @@ The test vectors in Sections 5.4-5.7 were chosen with the following techniques f
 - **Test clock.** The server's clock can be set by the tester, so time-based rules can be tested in seconds instead of days.
 - **Stand-ins for external services.** The payment service is replaced by *FakePaymentGateway* (an implementation of the PaymentGateway interface) in unit and integration tests, and by the payment processor's own sandbox in functional and system tests. The email and review services use a sandbox and a stub, and can be switched off to test the "service unavailable" flows.
 - **Test data.** Two theaters. Theater 1 has Auditorium 1 (regular, 150 general-admission seats) and Auditorium 2 (deluxe, 75 seats in rows A-E, numbered 1-15). Two showtimes of a 120-minute test movie start at **7:00 PM on Friday, 20 November 2026**: **SHOW-REG** in Auditorium 1 and **SHOW-DLX** in Auditorium 2. Test prices are ADULT $15.00 and CHILD, STUDENT, SENIOR, and MILITARY $11.00, with a $1.00 fee per ticket on the website and kiosk. Test accounts exist for each role: E100 (BOX_OFFICE), E200 (ADMINISTRATOR), and E300 (MANAGER), plus one customer account.
-- **Tools.** An automated unit-testing framework and code-coverage tool for the language chosen in Task 1 (coverage target of 80%, NFR-M-03); a load-testing tool such as Apache JMeter for TS-S1 and TS-S2; an automated accessibility checker for TS-S4; and GitHub Issues in the group repository for tracking defects.
+- **Tools.** An automated unit-testing framework and code-coverage tool (coverage target of 80%, NFR-M-03); a load-testing tool such as Apache JMeter for TS-S1 and TS-S2; an automated accessibility checker for TS-S4; and GitHub Issues in the repository for tracking defects.
 
 ### 5.2.4 Entry and Exit Criteria
 
-**Entry criteria.** A test level starts only when the level below it has passed: integration tests run on classes that pass their unit tests, functional tests run on modules that pass integration, and system tests run on the fully integrated build. The requirements (SRS Version 2.0) are baselined, so tests are written against fixed requirement IDs.
+**Entry criteria.** A test level starts only when the level below it has passed: integration tests run on classes that pass their unit tests, functional tests run on modules that pass integration, and system tests run on the fully integrated build. So, tests are written against fixed requirement IDs.
 
 **Defect severity.**
 
@@ -1272,8 +1272,6 @@ Figure 4 places the test plan on the software architecture from Figure 2. Each c
 ![Figure 4. Test scope of the CMC Ticketing System](images/figure4-test-scope.png)
 
 *Figure 4. Test scope of the CMC Ticketing System, drawn on the architecture of Figure 2*
-
-Table 5-2 lists the failures each part of the design is tested against.
 
 **Table 5-2.** *Design elements, test sets, and failures covered*
 
