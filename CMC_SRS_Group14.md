@@ -1,7 +1,7 @@
 # Chinese Multi-Cinema (CMC) Ticketing System
 
 **Software Requirements Specification**  
-Version 3.0 · 22 October 2026
+Version 4.0 · 12 November 2026
 
 **Group #14:** Luke F., Matthew W., Joshua H.
 
@@ -19,6 +19,7 @@ Instructor: Gus Hanna, Ph.D. · Fall 2026
 | 24 Sep 2026 | Version 1.0 - Complete SRS (Sections 1-3.5) | Joshua H., Luke F., Matthew W. | Completed Sections 1-3.5: functional requirements, use-case diagram and descriptions, classes, and non-functional requirements. |
 | 8 Oct 2026 | Version 2.0 - Software Design Specification | Joshua H., Luke F., Matthew W. | Added Section 4: system description, software architecture, UML class diagram, class descriptions, and development plan. |
 | 22 Oct 2026 | Version 3.0 - Test Plan | Joshua H., Luke F., Matthew W. | Added Section 4.6 (design updates) and Section 5: test strategy, test-scope diagram, unit, integration, functional, and system test sets, ten sample test cases, traceability, and test schedule. |
+| 12 Nov 2026 | Version 4.0 - Design 2.0: Architecture and Data Management | Joshua H., Luke F., Matthew W. | Added Section 6: updated architecture diagram with all data stores (Figure 5), design changes since Version 2.0, data management strategy with logical data model (Figure 6), and discussion of alternatives and tradeoffs. Added database terms to 1.3 and references to 1.4. |
 
 # Document Approval
 
@@ -140,12 +141,25 @@ The following Software Requirements Specification has been accepted and approved
   - [5.8 Test Case Samples](#58-test-case-samples)
   - [5.9 Requirements Traceability](#59-requirements-traceability)
   - [5.10 Test Schedule and Responsibilities](#510-test-schedule-and-responsibilities)
+- [6. Design 2.0: Architecture and Data Management](#6-design-20-architecture-and-data-management)
+  - [6.1 Updated Software Architecture](#61-updated-software-architecture)
+  - [6.2 Modifications from the Initial Design (Version 2.0)](#62-modifications-from-the-initial-design-version-20)
+  - [6.3 Data Management Strategy](#63-data-management-strategy)
+    - [6.3.1 Overview](#631-overview)
+    - [6.3.2 Logical Organization of the Data](#632-logical-organization-of-the-data)
+    - [6.3.3 Data Integrity and Consistency](#633-data-integrity-and-consistency)
+    - [6.3.4 Sensitive Data and Security](#634-sensitive-data-and-security)
+    - [6.3.5 Backup, Recovery, and Retention](#635-backup-recovery-and-retention)
+  - [6.4 Design Decisions, Alternatives, and Tradeoffs](#64-design-decisions-alternatives-and-tradeoffs)
+    - [6.4.1 SQL or NoSQL](#641-sql-or-nosql)
+    - [6.4.2 How Many Databases](#642-how-many-databases)
+    - [6.4.3 Other Design Decisions](#643-other-design-decisions)
 
 # 1. Introduction
 
 Chinese Multi-Cinema (CMC) operates 20 movie theaters in the San Diego area. Its current ticketing software handles basic sales, but years of patches have made it slow and unreliable, and customers have no convenient way to buy tickets ahead of time. CMC needs a single, modern ticketing system shared by every theater, kiosk, and box office, so that customers can buy tickets in a few minutes from anywhere and every employee sees the same showtimes, prices, and seat availability.
 
-The new CMC Ticketing System will let customers browse movies and showtimes, buy up to 20 tickets at a time, choose their seats in deluxe auditoriums, and receive tickets by email or as a printout, either as a guest or with an optional account that tracks loyalty points and membership. Theater employees will use the same system to sell, scan, and refund tickets, administrators will use it to manage movies, showtimes, and prices, and CMC management will use it to review sales across all locations. Sections 1-3 describe what the system must do and how well it must do it; Section 4 describes how it will be built; and Section 5 describes how it will be tested.
+The new CMC Ticketing System will let customers browse movies and showtimes, buy up to 20 tickets at a time, choose their seats in deluxe auditoriums, and receive tickets by email or as a printout, either as a guest or with an optional account that tracks loyalty points and membership. Theater employees will use the same system to sell, scan, and refund tickets, administrators will use it to manage movies, showtimes, and prices, and CMC management will use it to review sales across all locations. Sections 1-3 describe what the system must do and how well it must do it; Section 4 describes how it will be built; Section 5 describes how it will be tested; and Section 6 updates the design with how the system's data will be stored and protected.
 
 ## 1.1 Purpose
 
@@ -187,20 +201,26 @@ The software product specified here is the **CMC Ticketing System**, a browser-b
 
 | **Term**                          | **Definition**                                                                                                        |
 |-----------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| **ACID**                          | Atomicity, Consistency, Isolation, Durability: the guarantees a database transaction gives that a group of changes is saved completely or not at all. |
 | **Administrator**                 | An authorized CMC employee who manages movies, showtimes, auditoriums, prices, and transaction corrections.           |
 | **API**                           | Application Programming Interface; a defined way for two software systems to exchange data.                           |
 | **Auditorium (regular / deluxe)** | A screening room. Regular auditoriums hold 150 general-admission seats; deluxe auditoriums hold 75 assigned seats.    |
+| **Cache**                         | A temporary copy of data kept in fast storage so it can be read quickly; it can always be rebuilt from the original. |
 | **CMC**                           | Chinese Multi-Cinema, the client organization.                                                                        |
 | **Customer account**              | An optional account storing a customer's profile, purchase history, loyalty points, membership, and payment tokens.   |
 | **Digital ticket**                | A ticket delivered electronically that carries a unique machine-readable validation code.                             |
+| **Idempotency key**               | A unique value sent with a request so that repeating the request has no extra effect (for example, a payment is not charged twice). |
 | **MoSCoW**                        | Priority scheme used in this SRS: Must have, Should have, Could have (see Section 3).                                 |
 | **Payment token**                 | A reference issued by the payment processor that stands in for card details; CMC never stores the card number itself. |
 | **PCI DSS**                       | Payment Card Industry Data Security Standard.                                                                         |
 | **Showtime**                      | A scheduled screening of a movie in a specific auditorium at a specific date and time.                                |
+| **Replica**                       | A copy of a database that is kept up to date automatically from the main (primary) database. |
+| **Schema (database)**             | A named group of related tables inside one database. |
+| **SQL / NoSQL**                   | SQL databases store data in related tables queried with the SQL language; NoSQL databases use other models, such as documents or key-value pairs. |
 | **SRS**                           | Software Requirements Specification (this document).                                                                  |
 | **Ticket hold**                   | A temporary five-minute reservation of selected tickets or seats created when checkout begins.                        |
 | **TLS**                           | Transport Layer Security, the encryption used by HTTPS connections.                                                   |
-| **Transaction**                   | A completed or attempted purchase, refund, or override recorded by the system.                                        |
+| **Transaction**                   | A completed or attempted purchase, refund, or override recorded by the system. (A *database transaction* is a group of database changes saved all together or not at all.) |
 | **UR / FR / NFR / UC**            | Prefixes for User Requirements, Functional Requirements, Non-Functional Requirements, and Use Cases.                  |
 
 ## 1.4 References
@@ -219,9 +239,13 @@ The software product specified here is the **CMC Ticketing System**, a browser-b
 
 - GeeksforGeeks. *Test Plan - Software Testing*. Available from geeksforgeeks.org/software-testing/test-plan-software-testing/.
 
+- The PostgreSQL Global Development Group. *PostgreSQL Documentation*. Available from postgresql.org/docs.
+
+- Redis Ltd. *Redis Documentation*. Available from redis.io/docs.
+
 ## 1.5 Overview
 
-The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5). **Section 4 - Software Design Specification** describes how the system would be built: a system description (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5), and the design updates made in this version (4.6). **Section 5 - Test Plan** describes how the system will be verified and validated: the test strategy (5.1-5.2), the test scope drawn on the architecture (5.3), the unit, integration, functional, and system test sets (5.4-5.7), the sample test cases (5.8), requirements traceability (5.9), and the test schedule (5.10).
+The rest of this SRS moves from general to specific. **Section 2 - General Description** is written for non-technical readers: it explains the product's context, the user requirements (what each type of user needs to accomplish), the characteristics of those users, and the constraints, assumptions, and dependencies that shape the requirements. **Section 3 - Specific Requirements** contains the detailed, numbered requirements used by developers and testers: external interfaces (3.1), functional requirements grouped by feature (3.2), the use-case diagram and use-case descriptions (3.3), the main classes and objects (3.4), and measurable non-functional requirements (3.5). **Section 4 - Software Design Specification** describes how the system would be built: a system description (4.1), the software architecture (4.2), the UML class diagram (4.3), the classes with their attributes and operations (4.4), and the development plan (4.5), and the design updates made in this version (4.6). **Section 5 - Test Plan** describes how the system will be verified and validated: the test strategy (5.1-5.2), the test scope drawn on the architecture (5.3), the unit, integration, functional, and system test sets (5.4-5.7), the sample test cases (5.8), requirements traceability (5.9), and the test schedule (5.10). **Section 6 - Design 2.0: Architecture and Data Management** updates the design in Section 4: the updated architecture diagram with every data store (6.1), the changes made since the original design (6.2), the data management strategy, including the logical data model, data integrity, security, and backups (6.3), and the design decisions, alternatives, and tradeoffs behind it (6.4).
 
 # 2. General Description
 
@@ -927,7 +951,7 @@ This section describes how the CMC Ticketing System would be built. It is writte
 
 The CMC Ticketing System is a web-based ticketing system shared by all 20 Chinese Multi-Cinema theaters in San Diego. Customers use the website or a lobby kiosk to browse showtimes, buy up to 20 tickets, choose seats in deluxe auditoriums, and receive tickets by email or print, either as guests or with an optional account. Employees use the same system to sell, scan and refund tickets; administrators manage movies, showtimes and prices; and managers view sales reports.
 
-The design is object-oriented and uses a three-tier client-server architecture. All three sales channels are web browser clients that talk to one central server and one central database, so every theater, kiosk and box office sees the same showtimes, prices and seat availability (SI-03). The classes in Section 4.4 build on the conceptual classes in Section 3.4.
+The design is object-oriented and uses a three-tier client-server architecture. All three sales channels are web browser clients that talk to one central server and one central database, so every theater, kiosk and box office sees the same showtimes, prices and seat availability (SI-03). Section 6 describes how that database is built, copied, and protected. The classes in Section 4.4 build on the conceptual classes in Section 3.4.
 
 ## 4.2 Software Architecture Overview
 
@@ -936,6 +960,8 @@ Figure 2 shows the major components of the system (solid boxes), grouped into ti
 ![Figure 2. Software architecture diagram of the CMC Ticketing System](images/figure2-architecture.png)
 
 *Figure 2. Software architecture diagram of the CMC Ticketing System*
+
+**Note (Version 4.0):** Figure 2 is the original Version 2.0 architecture. It is updated by Figure 5 in Section 6.1, which shows the data tier in detail.
 
 **Components.** Table 4-1 describes each component in Figure 2.
 
@@ -1571,3 +1597,214 @@ The test schedule follows the development plan in Section 4.5: unit tests are wr
 Defects found at any level are recorded as GitHub Issues with their severity, the failing test case ID, and the requirement ID. A defect is closed only after its test case passes again and the full regression suite still passes.
 
 The testing process will be fully logged including results and statuses for each case. After testing occurs, a summary will be created that details whether the exit criteria in 5.2.4 are met and the system is ready to deploy.
+
+# 6. Design 2.0: Architecture and Data Management
+
+This section updates the Software Design Specification in Section 4. Version 2.0 of the design showed a single "Central Database" but did not say what kind of database it was, how the data inside it was organized, or how that data would be protected and recovered. This section fills that gap. It presents an updated architecture diagram that shows every data store (6.1), lists what changed since the original design and why (6.2), describes the data management strategy (6.3), and explains our design decisions, the alternatives we considered, and the tradeoffs between them (6.4).
+
+The classes and relationships in Figure 3 and Section 4.4 do not change. This section describes where and how their data is stored.
+
+## 6.1 Updated Software Architecture
+
+Figure 5 shows the updated architecture. The client tier, the six server modules, and the three external services are the same as in Figure 2. The changes are in the data tier, which now has five parts instead of one database, and in the two server components that work with it: the Data Access Layer and the Reports module. Shaded boxes are new or changed since Version 2.0.
+
+![Figure 5. Updated software architecture of the CMC Ticketing System](images/figure5-updated-architecture.png)
+
+*Figure 5. Updated software architecture of the CMC Ticketing System, showing the data tier*
+
+**Components.** Table 6-1 describes the new and changed components. All other components are as described in Table 4-1.
+
+**Table 6-1.** *New and changed components*
+
+| Component | Tier | Description |
+| :------------------ | :---------- | :------------------------------------------------------------------------ |
+| **Operational Database** | Data | A PostgreSQL relational database. It is the system of record: the one place where every permanent piece of data (theaters, showtimes, prices, seats, holds, tickets, transactions, accounts, and audit records) is stored. Its tables are grouped into four schemas (Section 6.3.2). Replaces the "Central Database" of Figure 2. |
+| **Standby Replica** | Data | An exact copy of the Operational Database, kept in a separate building or cloud zone. It is updated *synchronously*: a purchase is confirmed only after it has been saved on both copies. If the primary database fails, the standby takes over automatically (NFR-A-04, NFR-R-05). |
+| **Reporting Replica** | Data | A read-only copy of the Operational Database, updated a few seconds behind it. Sales reports run here, so large report queries never slow down ticket sales. |
+| **Cache & Session Store** | Data | Redis, an in-memory key-value store. It holds short-lived data that must be fast and can be rebuilt if lost: sign-in sessions, the checkout waiting queue, bot-detection counters, and cached browse results. |
+| **Backup Storage** | Data | Encrypted storage at a separate location. It receives a full backup every night and a continuous copy of the database's change log, and it keeps them for 30 days (NFR-R-04). |
+| **Data Access Layer** *(changed)* | Server | Still loads and saves the objects of Figure 3, but now also sends each kind of data to the right store (Table 6-3): permanent data to the Operational Database, report queries to the Reporting Replica, and temporary data to Redis. The modules above it do not need to know which store they are using. |
+| **Reports** *(changed)* | Server module | Reads from the Reporting Replica instead of the main database (FR-41 to FR-43). It has no permission to write any data. |
+
+**Connectors.** K1 and K3 to K5 are unchanged from Table 4-2. Table 6-2 describes the changed connector K2 and the three new connectors.
+
+**Table 6-2.** *New and changed connectors*
+
+| ID | Connects | Protocol | Purpose |
+| :---------- | :------------------------ | :---------------- | :-------------------------------------------------- |
+| **K2** *(changed)* | Data Access Layer and the Operational Database or Reporting Replica | SQL over TLS | Reads and saves permanent data. Each purchase, refund, and seat change is saved as one database transaction (Section 6.3.3). Report queries go to the Reporting Replica and can only read. |
+| **K6** *(new)* | Data Access Layer and Cache & Session Store | Redis protocol over TLS | Reads and saves sessions, queue positions, rate-limit counters, and cached pages. Every value is given an expiry time. |
+| **K7** *(new)* | Operational Database to Standby Replica and Reporting Replica | PostgreSQL streaming replication | Copies every change. The copy to the standby is synchronous, so no confirmed purchase can be lost; the copy to the reporting replica is asynchronous, because reports can be a few seconds behind. |
+| **K8** *(new)* | Standby Replica to Backup Storage | Encrypted file transfer | Sends the nightly full backup and the continuous change log. Backups are taken from the standby so they do not add load to the primary database. |
+
+**Table 6-3.** *Where each kind of data is stored*
+
+| Data | Store | Why |
+| :-------------------------------------- | :------------------------------ | :-------------------------------- |
+| Theaters, auditorium layouts, movies, showtimes, prices | Operational Database (catalog schema) | Permanent; changed only by administrators |
+| Seat status, ticket holds, payment attempts, transactions, tickets | Operational Database (sales schema) | Involves money and seats; must never be lost or sold twice |
+| Customer and employee accounts, saved payment tokens | Operational Database (accounts schema) | Permanent and sensitive |
+| Audit records and sign-in history | Operational Database (audit schema) | Permanent and must not be changed |
+| Sign-in sessions, waiting queue, checkout-attempt counters | Cache & Session Store | Short-lived and needs to be fast; if lost, users sign in again |
+| Cached movie and showtime lists and review scores | Cache & Session Store | A copy only; rebuilt from the database within 60 seconds |
+| Sales report queries | Reporting Replica | Large, read-only queries kept away from ticket sales |
+
+**Example (updated from Section 4.2).** A customer buys two deluxe seats on the website:
+
+1. The Browsing module looks for the theater's showtime list in the Cache & Session Store (K6). If it is not there, it reads the list from the Operational Database (K2) and caches it for 60 seconds. Seats remaining and the seat map are always read from the database itself, never from the cache, so every channel sees the same availability (NFR-P-04).
+2. When the customer chooses seats, the Ticket Purchase module locks the two seat rows, checks that both are AVAILABLE, marks them HELD, and creates the ticket hold, all in one database transaction. If either seat is already taken, nothing changes and the customer is asked to choose again.
+3. Before contacting the Payment Service, the module saves a *payment attempt* marked PENDING, with a unique key for this checkout. It then sends the payment, with the same key, over K3.
+4. When the payment is approved, one database transaction marks the attempt APPROVED, saves the transaction and the two tickets, and changes the seats from HELD to SOLD. The purchase is confirmed to the customer only after this transaction has also been saved on the Standby Replica (K7).
+5. The Email Service sends the tickets (K4). Because the kiosks and box offices read the same database, the two seats already show as sold on every channel.
+
+If the server fails between steps 3 and 4, the PENDING payment attempt tells the system to ask the Payment Service for the result before trying again, so the customer is never charged twice (Section 3.2.3.5).
+
+## 6.2 Modifications from the Initial Design (Version 2.0)
+
+Version 3.0 (Section 4.6) made no changes to the architecture. Table 6-4 lists every change made in this version, compared with the Version 2.0 design in Figure 2, and the requirement or problem that led to it.
+
+**Table 6-4.** *Design changes since Version 2.0*
+
+| # | Change | Version 2.0 | Version 4.0 | Reason |
+| :---- | :----------------- | :---------------------- | :------------------------- | :-------------------------------- |
+| 1 | Database technology chosen | "Central Database"; no technology named | PostgreSQL relational database | The data is closely related and seat and payment updates need all-or-nothing transactions (Section 6.4.1). |
+| 2 | Database organized into schemas | One undivided database | Four schemas: catalog, sales, accounts, and audit | Makes clear which module owns which data and lets each module be given only the permissions it needs (NFR-S-04). |
+| 3 | Standby Replica added | One database server, so a single point of failure | Synchronous standby copy with automatic failover | NFR-A-04 (one server failure stops sales for at most 5 minutes) and NFR-R-05 (no confirmed purchase lost). |
+| 4 | Reporting Replica added | Reports ran on the same database as ticket sales | Reports run on a read-only copy | A large report during a busy release could slow checkout (NFR-P-03). |
+| 5 | Cache & Session Store added | Sessions, the waiting queue, and bot counters had no defined home | Redis stores them with automatic expiry | Fast, short-lived data for FR-27, FR-45, NFR-S-08, and NFR-P-02. |
+| 6 | Backup Storage added | NFR-R-04 (daily backups, kept 30 days) had no component | Encrypted, off-site backup storage | Meets NFR-R-04 and allows recovery from a failure that affects both database copies. |
+| 7 | Data Access Layer routes data | Talked to one database | Sends each kind of data to the right store (Table 6-3) | Keeps the modules unaware of where data is stored. |
+| 8 | Connectors added or changed | K1 to K5 | K2 now uses TLS and can reach the replica; K6, K7, and K8 added | Needed by changes 3 to 6; TLS meets NFR-S-01. |
+| 9 | Supporting tables added | Not described | showtime_seat, hold_item, ticket_price, payment_attempt, saved_payment_method, and sign_in_log (Figure 6) | Store lists that a class keeps in memory and data that has no class of its own; payment_attempt makes the no-double-charge rule (NFR-R-01) possible. |
+| 10 | Ticket codes stored as a hash | Not described | The database stores only a one-way hash of each ticket's validation code | A stolen copy of the database cannot be used to print valid tickets (NFR-S-06). |
+
+**Effect on the test plan.** The test sets in Section 5 still apply, and Figure 4 is not redrawn because it marks the same server components. Three test sets gain a data-tier target: TS-I1 and TS-S1 test the row locking on the showtime_seat table that prevents double sales; TS-S2's single-server-failure test (NFR-A-04) also stops the primary database and checks that the standby takes over within 5 minutes with no confirmed purchase missing; and TS-S3 checks that the Reports module's database user cannot change any data. A restore from Backup Storage is tested before deployment in Task 8.
+
+## 6.3 Data Management Strategy
+
+### 6.3.1 Overview
+
+The CMC Ticketing System uses **SQL for all permanent data and a small in-memory store for temporary data.** The rule for deciding where data goes is:
+
+- If losing or corrupting the data would lose money, a seat, a ticket, an account, or a record, it is stored in the **Operational Database** (PostgreSQL).
+- If the data can be rebuilt from the database, or losing it only means a user has to sign in again, it may be stored in the **Cache & Session Store** (Redis).
+
+This gives the system **two databases**: one PostgreSQL database and one Redis store. The Standby Replica and the Reporting Replica are copies of the PostgreSQL database that hold the same data; they are not separate databases and nothing is ever written to them directly.
+
+### 6.3.2 Logical Organization of the Data
+
+Figure 6 shows the logical data model. The tables of the Operational Database are grouped into four **schemas**. A schema is a named group of tables inside one database: it keeps related tables together and makes permissions easy to manage, but tables in different schemas can still be joined in one query and updated in one transaction. The Redis keys are shown on the right. To keep the figure readable, relationships are drawn as lines inside each schema; a link to a table in another schema is written as "FK → table".
+
+![Figure 6. Logical data model of the CMC Ticketing System](images/figure6-logical-data-model.png)
+
+*Figure 6. Logical data model of the CMC Ticketing System, grouped by schema*
+
+**Table 6-5.** *Schemas, their tables, and which modules use them*
+
+| Schema | Tables | Holds | Written by | Read by |
+| :----------- | :------------------------ | :---------------------- | :----------------------- | :-------------------- |
+| **catalog** | theater, auditorium, seat, movie, showtime, ticket_price | What is playing, where, when, and at what price | Administration (Browsing refreshes cached review scores) | All modules |
+| **sales** | showtime_seat, ticket_hold, hold_item, payment_attempt, transaction, ticket | Seat availability, holds, payments, and tickets | Ticket Purchase, Box Office, Administration (overrides and cancellations) | Accounts (purchase history), Reports (through the replica) |
+| **accounts** | customer_account, saved_payment_method, employee_account | Customer and staff accounts | Accounts (Ticket Purchase adds loyalty points) | Ticket Purchase, Box Office, Administration (role checks) |
+| **audit** | audit_record, sign_in_log | Permanent record of sensitive actions and sign-in attempts | Box Office, Administration, Accounts (insert only) | Administrators and managers |
+
+**From classes to tables.** Each class in Section 4.4 is stored in a table of the same name, with these differences:
+
+- **Account** is abstract, so it has no table. Its sign-in fields are repeated in customer_account and employee_account (Section 6.4.3 explains why). Each account's single active session (FR-27) is kept in Redis, where signing in on a new device simply replaces the old session.
+- **Lists become child tables.** Showtime's seat-status map becomes one showtime_seat row per seat; TicketHold's ticket types and seats become hold_item rows; a Transaction's tickets are ticket rows that point to it; and a CustomerAccount's saved payment tokens become saved_payment_method rows.
+- **PaymentGateway** is an interface with no data, so it has no table.
+- **Three tables have no class:** ticket_price (the prices administrators configure, FR-37), payment_attempt (each call to the Payment Service, NFR-R-01), and sign_in_log (sign-in attempts, NFR-S-05).
+
+**Regular and deluxe seating.** A deluxe showtime has 75 showtime_seat rows, created when the showtime is scheduled, each AVAILABLE, HELD, or SOLD. A regular showtime has no seat rows; instead its ga_seats_taken counter counts held and sold general-admission tickets, and the database refuses any change that would take it past the auditorium's capacity of 150 (FR-10).
+
+### 6.3.3 Data Integrity and Consistency
+
+- **One system of record.** Every channel reads and writes the same Operational Database, so prices and availability are the same everywhere (SI-03). Seat availability is never cached.
+- **Database rules as a safety net.** Primary keys, foreign keys, UNIQUE rules (confirmation numbers, ticket code hashes, payment-attempt keys, and account emails), and CHECK rules (prices above zero, ratings from 1 to 5, at most 20 items per hold, and general-admission seats within capacity) are enforced by the database itself. Even if the application code had a bug, the database would refuse the invalid data.
+- **No seat sold twice (FR-12, NFR-R-02).** To hold seats, the Ticket Purchase module locks the requested showtime_seat rows inside a transaction. If two customers ask for the same seat at the same moment, the second request waits until the first finishes, then sees the seat as HELD and fails. A hold takes all of the requested seats or none of them.
+- **Expired holds (FR-13, NFR-R-03).** Each hold stores its expiry time. Any hold past that time is treated as released immediately, and a cleanup task runs every 5 seconds to return the seats to AVAILABLE, well within the 10-second limit.
+- **Exactly one charge (NFR-R-01).** The payment attempt is saved with a unique key before the Payment Service is called, and the same key is sent to the service. A repeated submission reuses the key, so it cannot create a second charge or a second transaction.
+- **All-or-nothing purchases (FR-18, FR-19).** After the payment is approved, the transaction, its tickets, and the SOLD seat changes are saved in a single database transaction: either all of them are saved or none are.
+- **Write-once audit records (FR-39).** The application's database users may add rows to the audit schema and read them, but they have no permission to change or delete them.
+
+### 6.3.4 Sensitive Data and Security
+
+The system stores personal and payment-related data, so each kind of data is protected according to how sensitive it is. Table 6-6 shows how.
+
+**Table 6-6.** *Sensitive data and how it is protected*
+
+| Data | Examples | Sensitivity | Protection |
+| :---------------- | :---------------------- | :------------ | :-------------------------------------------------- |
+| Card details | Card number, security code | Highest | Never stored or seen by CMC. They are typed into the payment processor's own form, and CMC keeps only a token and the last four digits (NFR-S-03, PCI DSS). |
+| Payment tokens | Saved payment methods, payment references | High | Encrypted in their own columns, with the key kept outside the database in a key-management service. Only the Ticket Purchase module can decrypt them. |
+| Passwords | password_hash | High | Stored only as salted bcrypt hashes, which cannot be turned back into passwords (NFR-S-02). |
+| Personal information | Names, account emails, guest emails | Medium | Encrypted at rest (NFR-S-01). A customer sees only their own data; employees see it only when looking up a transaction (FR-30). |
+| Ticket validation codes | code_hash | Medium | Codes are 128-bit random values (NFR-S-06); only their hash is stored. A scanner's code is hashed and looked up, so a copy of the database cannot be used to make tickets. |
+| Audit and sign-in records | audit_record, sign_in_log | Medium | Insert-only (Section 6.3.3); readable only by administrators and managers. |
+| Sessions | session:{account_id} keys in Redis | Medium | Random session tokens that expire automatically; sent only over TLS. |
+| Catalog | Movies, showtimes, prices | Low (public) | Anyone may read it; only administrators may change it, and each change is audited. |
+
+In addition, all data stores sit on a private network that only the CMC server can reach; the disks and backups are encrypted; and each server module connects with its own database user that has access only to the schemas listed for it in Table 6-5. Kiosks store no customer data at all (NFR-S-07).
+
+### 6.3.5 Backup, Recovery, and Retention
+
+- **Server failure.** If the primary database fails, the Standby Replica is promoted automatically, usually within one minute, and no confirmed purchase is lost because every purchase was already saved on the standby (NFR-A-04, NFR-R-05).
+- **Backups.** A full backup is taken every night and the database's change log is copied to Backup Storage continuously. Together they allow the database to be restored to any moment in the last 30 days (NFR-R-04), for example to undo a mistake made by an administrator. A test restore is performed every month during the maintenance window (NFR-A-02).
+- **Redis.** The Cache & Session Store is not backed up. If it is lost, caches refill from the database, customers sign in again, and customers waiting in a queue rejoin it.
+- **Software updates.** Changes to the database structure are written as versioned scripts stored in the GitHub repository and applied during the maintenance window, so updates do not lose data (NFR-M-04).
+
+**Table 6-7.** *How long data is kept (based on assumed CMC policies)*
+
+| Data | Kept for | Then |
+| :------------------------------------ | :-------------------------------- | :-------------------------------- |
+| Transactions, tickets, and audit records | 7 years (assumed CMC financial-records policy) | Moved to archive storage |
+| Guest email addresses on transactions | 1 year | Removed; the transaction stays for reports |
+| Ticket holds and hold items | 1 day after they expire or become a purchase | Deleted |
+| Payment attempts and sign-in log | 1 year | Deleted |
+| Customer accounts | Until the customer closes the account | Personal data deleted; past transactions kept without the customer's name or email |
+| Backups | 30 days (NFR-R-04) | Deleted |
+
+## 6.4 Design Decisions, Alternatives, and Tradeoffs
+
+### 6.4.1 SQL or NoSQL
+
+The main technology decision was between a relational (SQL) database and a NoSQL database such as a document store (for example, MongoDB) or a key-value store (for example, Amazon DynamoDB). Table 6-8 compares them for this system.
+
+**Table 6-8.** *Relational (SQL) compared with NoSQL for the CMC Ticketing System*
+
+| Consideration | Relational database (chosen) | NoSQL database |
+| :---------------- | :------------------------------------------ | :------------------------------------------ |
+| **Shape of the data** | Fits well: theaters, auditoriums, showtimes, seats, tickets, and transactions are separate things linked to each other, exactly as in Figure 3. | Fits less well: related data is either copied into several documents, which can then disagree, or joined together in application code. |
+| **Seats and money** | Built-in transactions with locking make "no seat sold twice" and "tickets only after payment" simple and reliable. | Possible, but multi-record transactions are more limited or slower in many NoSQL systems, and more of the work falls on our code. |
+| **Reports** | Sales by theater, movie, and date range are ordinary SQL queries (FR-42). | Each new report often needs its own copy of the data or extra processing. |
+| **Changing the structure** | Needs a migration script whenever a column is added. | Flexible: new fields can be added at any time. |
+| **Scaling** | One server, plus replicas for reading, is enough at CMC's size; growing far beyond that is harder. | Spreads easily across many servers, which matters at very large scale. |
+
+**Decision.** We chose a relational database because the system's most important requirements, never selling a seat twice and never charging twice, depend on reliable transactions, and because the data is naturally relational. NoSQL's main strengths, a flexible structure and very large scale, do not matter much here: CMC's data has a fixed, well-understood structure, and even if each of the 20 theaters ran about 60 showings a day (roughly 1,200 showtimes), the system would sell at most about 180,000 tickets a day, which one PostgreSQL server handles easily. We chose PostgreSQL over other relational databases because it is free, open source, widely used, and supported by every major cloud provider. The tradeoff we accept is that structural changes need migration scripts, and that growing to thousands of theaters would require a larger redesign.
+
+### 6.4.2 How Many Databases
+
+Table 6-9 compares four ways of dividing the data among databases.
+
+**Table 6-9.** *Options for the number of databases*
+
+| Option | Benefits | Drawbacks |
+| :-------------------------- | :-------------------------------- | :------------------------------------------ |
+| **A. One database for everything** (Version 2.0) | Simplest to build and run. | Sessions, queue counters, and caches add constant small writes to the main database; reports compete with checkout; one server is a single point of failure. |
+| **B. One relational database plus one in-memory store, with replicas** (chosen) | All money and seat data is in one place, so it can be updated in one transaction; fast temporary data is kept apart; replicas give failover and a separate place for reports. | Two technologies to learn and run; Redis data can be lost (acceptable, because by design nothing in it is the only copy). |
+| **C. A separate database for each module** (microservices) | Modules can be developed, scaled, and deployed on their own. | A purchase touches seats, tickets, transactions, and accounts, so one purchase would span several databases and need complex coordination to stay consistent. Too complex for three developers and 20 theaters. |
+| **D. A separate database at each theater** | Box offices could keep selling if a theater lost its internet connection. | Breaks the shared, real-time inventory required by SI-03 and NFR-P-04, since the website would have to check 20 databases; company-wide reports would need to combine 20 databases. |
+
+**Decision.** We chose option B. It keeps the critical data together, which is the main reason for choosing SQL in the first place, while fixing the weaknesses of option A. Option D would only be worth reconsidering if the assumption in Section 2.5 that every theater has a reliable internet connection turned out to be false.
+
+### 6.4.3 Other Design Decisions
+
+**Table 6-10.** *Other data design decisions*
+
+| Decision | Our choice | Alternative considered | Tradeoff |
+| :---------------- | :-------------------- | :------------------------ | :---------------------------------------- |
+| **Where to keep ticket holds** | In PostgreSQL, as HELD seat rows with an expiry time | In Redis, which can delete a key automatically when its time runs out | Redis would be slightly faster and simpler for timing, but seat status would then live in two places that could disagree, which risks selling a seat twice. Correctness matters more than a few milliseconds. |
+| **Where reports run** | On a read-only replica | (a) On the main database; (b) in a separate data warehouse loaded every night | (a) is simpler but lets reports slow down sales. (b) is better for long-term trend analysis, but its data would be up to a day old and it is another system to build. The replica is a few seconds behind, which is fine for sales reports. CMC could add a warehouse later. |
+| **Splitting data inside the database** | Four schemas in one database | Separate databases for each area | Separate databases would isolate the areas more strongly but would lose single-transaction purchases across sales and accounts. Schemas give clear ownership and permissions without that cost. |
+| **Customer and employee accounts** | Two separate tables | One account table with a type column, matching the abstract Account class | One table would mean less repeated code for sign-in, but staff accounts need different permissions and stricter protection. Separate tables let the database enforce that, at the cost of sign-in code checking two tables. |
+| **Who runs the databases** | A managed cloud database service (for example, Amazon RDS for PostgreSQL and a managed Redis service) | CMC's own servers | The managed service handles backups, failover, and security updates for a monthly fee, and ties CMC to one provider. Because PostgreSQL and Redis are open source, CMC could move to another provider or its own servers later without rewriting the system. |
